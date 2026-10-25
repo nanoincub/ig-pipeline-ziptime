@@ -1,6 +1,6 @@
 import type { CSSProperties } from "react";
 import type { SlideComponentProps, RenderContext, ThemeResolved } from "../shared/types.js";
-import { resolveTheme, coverTitleSize, em, paragraphs } from "../shared/types.js";
+import { resolveTheme, coverTitleSize, em, paragraphs, fioColor } from "../shared/types.js";
 import { Page, Kicker, CtaButton } from "../shared/components.js";
 
 /**
@@ -79,7 +79,7 @@ function renderCover(slide: SlideComponentProps["slide"], ctx: RenderContext, th
     <Page ctx={ctx} theme={theme} role={slide.role} contentStyle={{ justifyContent: "center", alignItems: "flex-start" }}>
       {slide.kicker ? <Kicker text={slide.kicker} color={theme.onDark ? "#FFFFFF" : ctx.accent} style={{ marginBottom: 28 }} /> : null}
       <div style={{ ...titleStyle(ctx, theme, size), textAlign: "left" }}>{title}</div>
-      <div style={{ display: "flex", width: 160, height: 10, backgroundColor: ctx.accent, borderRadius: 6, marginTop: 44 }} />
+      <div style={{ display: "flex", width: 160, height: 10, backgroundColor: fioColor(theme.onDark, ctx.accent), borderRadius: 6, marginTop: 44 }} />
     </Page>
   );
 }
@@ -88,6 +88,8 @@ function renderCover(slide: SlideComponentProps["slide"], ctx: RenderContext, th
 
 function renderBody(slide: SlideComponentProps["slide"], ctx: RenderContext, theme: ThemeResolved): JSX.Element {
   const num = slide.number != null ? String(slide.number) : "";
+  // Topo fixo: o número/conteúdo começa na mesma altura em todos os body slides.
+  const common = { justifyContent: "flex-start", alignItems: "flex-start", paddingTop: ctx.tokens.safeArea + 40 } as CSSProperties;
   const bodyTitle = (
     <div style={{ display: "flex", fontFamily: ctx.tokens.fonts.display, fontWeight: 600, fontSize: 56, lineHeight: 1.1, letterSpacing: em(-0.01, 56), color: theme.text }}>
       {slide.title ?? ""}
@@ -96,7 +98,7 @@ function renderBody(slide: SlideComponentProps["slide"], ctx: RenderContext, the
 
   if (slide.variant === "number-badge") {
     return (
-      <Page ctx={ctx} theme={theme} role={slide.role} contentStyle={{ justifyContent: "center", alignItems: "flex-start" }}>
+      <Page ctx={ctx} theme={theme} role={slide.role} contentStyle={common}>
         <div
           style={{
             display: "flex",
@@ -125,7 +127,7 @@ function renderBody(slide: SlideComponentProps["slide"], ctx: RenderContext, the
   if (slide.variant === "number-side") {
     const rowWidth = ctx.width - ctx.tokens.safeArea * 2;
     return (
-      <Page ctx={ctx} theme={theme} role={slide.role} contentStyle={{ justifyContent: "center", alignItems: "flex-start" }}>
+      <Page ctx={ctx} theme={theme} role={slide.role} contentStyle={common}>
         <div style={{ display: "flex", flexDirection: "row", alignItems: "flex-start", width: rowWidth }}>
           <div style={{ display: "flex", flexShrink: 0, fontFamily: ctx.tokens.fonts.display, fontWeight: 700, fontSize: 150, lineHeight: 0.9, color: ctx.accent, marginRight: 40 }}>
             {num}
@@ -142,7 +144,7 @@ function renderBody(slide: SlideComponentProps["slide"], ctx: RenderContext, the
 
   // number-huge (default)
   return (
-    <Page ctx={ctx} theme={theme} role={slide.role} contentStyle={{ justifyContent: "center", alignItems: "flex-start" }}>
+    <Page ctx={ctx} theme={theme} role={slide.role} contentStyle={common}>
       <div style={{ display: "flex", fontFamily: ctx.tokens.fonts.display, fontWeight: 700, fontSize: 180, lineHeight: 1, color: ctx.accent, marginBottom: 12 }}>
         {num}
       </div>
@@ -165,7 +167,7 @@ function renderClose(slide: SlideComponentProps["slide"], ctx: RenderContext, th
             {slide.title}
           </div>
         ) : null}
-        <CtaButton ctx={ctx} label={slide.cta ?? "Salve este post"} />
+        <CtaButton ctx={ctx} label={slide.cta ?? "Salve este post"} bookmark />
       </Page>
     );
   }

@@ -164,9 +164,28 @@ export function Kicker(props: { text: string; color: string; style?: CSSProperti
   );
 }
 
+/**
+ * Ícone de bookmark como SVG inline (Satori renderiza <svg>/<path> nativamente;
+ * sem emoji, sem <img> aninhado). Traço 2px na cor informada.
+ */
+export function BookmarkIcon(props: { color: string; size?: number }): JSX.Element {
+  const size = props.size ?? 36;
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path
+        d="M6 3h12a1 1 0 0 1 1 1v17l-7-5-7 5V4a1 1 0 0 1 1-1z"
+        stroke={props.color}
+        strokeWidth={2}
+        strokeLinejoin="round"
+        strokeLinecap="round"
+      />
+    </svg>
+  );
+}
+
 /** Botão de CTA no estilo cta-save: pílula na cor de accent, texto branco. */
-export function CtaButton(props: { ctx: RenderContext; label: string; icon?: string; style?: CSSProperties }): JSX.Element {
-  const { ctx, label, icon, style } = props;
+export function CtaButton(props: { ctx: RenderContext; label: string; bookmark?: boolean; style?: CSSProperties }): JSX.Element {
+  const { ctx, label, bookmark, style } = props;
   return (
     <div
       style={{
@@ -185,9 +204,10 @@ export function CtaButton(props: { ctx: RenderContext; label: string; icon?: str
         ...style,
       }}
     >
-      {icon ? (
-        <div style={{ display: "flex", flexShrink: 0, fontFamily: ctx.tokens.fonts.display, fontWeight: 700, fontSize: 40, marginRight: 20 }}>
-          {icon}
+      {bookmark ? (
+        <div style={{ display: "flex", flexShrink: 0, marginRight: 18 }}>
+          {/* branco para contrastar com a pílula accent (accent-sobre-accent seria invisível) */}
+          <BookmarkIcon color="#FFFFFF" size={38} />
         </div>
       ) : null}
       <div style={{ display: "flex", fontFamily: ctx.tokens.fonts.display, fontWeight: 600, fontSize: 38 }}>{label}</div>

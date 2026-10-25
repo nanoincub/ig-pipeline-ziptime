@@ -1,6 +1,6 @@
 import type { CSSProperties } from "react";
 import type { SlideComponentProps, RenderContext, ThemeResolved } from "../shared/types.js";
-import { resolveTheme, coverTitleSize, em, paragraphs, lines } from "../shared/types.js";
+import { resolveTheme, coverTitleSize, em, paragraphs, lines, fioColor } from "../shared/types.js";
 import { Page, Kicker, CtaButton } from "../shared/components.js";
 
 /**
@@ -32,10 +32,29 @@ function renderCover(slide: SlideComponentProps["slide"], ctx: RenderContext, th
   };
 
   if (slide.variant === "title-center-blue-bg") {
+    // Bloco sempre com contraste contra o fundo: em tema claro usa primary
+    // (texto branco); em tema gradiente usa branco (texto ink).
+    const blockColor = theme.onDark ? ctx.tokens.colors.bg : ctx.tokens.colors.primary;
+    const onBlockText = theme.onDark ? ctx.tokens.colors.ink : "#FFFFFF";
+    const onBlockKicker = theme.onDark ? ctx.tokens.colors.primary : "rgba(255,255,255,0.85)";
     return (
-      <Page ctx={ctx} theme={theme} role={slide.role} contentStyle={{ justifyContent: "center", alignItems: "center", textAlign: "center" }}>
-        {slide.kicker ? <Kicker text={slide.kicker} color={theme.onDark ? "#FFFFFF" : ctx.accent} style={{ marginBottom: 32, justifyContent: "center" }} /> : null}
-        <div style={{ ...titleStyle, textAlign: "center" }}>{title}</div>
+      <Page ctx={ctx} theme={theme} role={slide.role} contentStyle={{ justifyContent: "center", alignItems: "center" }}>
+        <div
+          style={{
+            display: "flex",
+            flexDirection: "column",
+            width: ctx.width - ctx.tokens.safeArea * 2,
+            backgroundColor: blockColor,
+            borderRadius: ctx.tokens.radius,
+            paddingTop: 72,
+            paddingBottom: 72,
+            paddingLeft: 56,
+            paddingRight: 56,
+          }}
+        >
+          {slide.kicker ? <Kicker text={slide.kicker} color={onBlockKicker} style={{ marginBottom: 28, justifyContent: "center" }} /> : null}
+          <div style={{ ...titleStyle, color: onBlockText, textAlign: "center" }}>{title}</div>
+        </div>
       </Page>
     );
   }
@@ -67,7 +86,7 @@ function renderCover(slide: SlideComponentProps["slide"], ctx: RenderContext, th
     <Page ctx={ctx} theme={theme} role={slide.role} contentStyle={{ justifyContent: "flex-start", alignItems: "flex-start" }}>
       {slide.kicker ? <Kicker text={slide.kicker} color={theme.onDark ? "#FFFFFF" : ctx.accent} style={{ marginBottom: 28, marginTop: 24 }} /> : null}
       <div style={{ ...titleStyle, textAlign: "left" }}>{title}</div>
-      <div style={{ display: "flex", width: 160, height: 10, backgroundColor: ctx.accent, borderRadius: 6, marginTop: 44 }} />
+      <div style={{ display: "flex", width: 160, height: 10, backgroundColor: fioColor(theme.onDark, ctx.accent), borderRadius: 6, marginTop: 44 }} />
     </Page>
   );
 }
@@ -113,7 +132,9 @@ function Paragraphs(props: { body?: string; theme: ThemeResolved; ctx: RenderCon
 }
 
 function renderBody(slide: SlideComponentProps["slide"], ctx: RenderContext, theme: ThemeResolved): JSX.Element {
-  const common = { justifyContent: "center", alignItems: "flex-start" } as CSSProperties;
+  // Alinhamento ao topo com padding fixo: kicker/título/corpo na mesma
+  // coordenada Y em todos os slides de body, sem "pular" entre um e outro.
+  const common = { justifyContent: "flex-start", alignItems: "flex-start", paddingTop: ctx.tokens.safeArea + 40 } as CSSProperties;
 
   if (slide.variant === "big-number") {
     const big = slide.highlight ?? (slide.number != null ? String(slide.number) : "");
@@ -226,7 +247,7 @@ function renderClose(slide: SlideComponentProps["slide"], ctx: RenderContext, th
             </div>
           ))}
         </div>
-        {slide.cta ? <CtaButton ctx={ctx} label={slide.cta} style={{ marginTop: 40 }} /> : null}
+        {slide.cta ? <CtaButton ctx={ctx} label={slide.cta} bookmark style={{ marginTop: 40 }} /> : null}
       </Page>
     );
   }
@@ -240,7 +261,7 @@ function renderClose(slide: SlideComponentProps["slide"], ctx: RenderContext, th
             {slide.title}
           </div>
         ) : null}
-        <CtaButton ctx={ctx} label={slide.cta ?? "Salve este post"} />
+        <CtaButton ctx={ctx} label={slide.cta ?? "Salve este post"} bookmark />
       </Page>
     );
   }

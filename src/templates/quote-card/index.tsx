@@ -1,5 +1,5 @@
 import type { SlideComponentProps } from "../shared/types.js";
-import { resolveTheme, coverTitleSize, em } from "../shared/types.js";
+import { resolveTheme, coverTitleSize, em, fioColor } from "../shared/types.js";
 import { Page, Kicker } from "../shared/components.js";
 
 /**
@@ -25,7 +25,7 @@ export function QuoteCard({ slide, ctx }: SlideComponentProps): JSX.Element {
   if (slide.variant === "left-ink-on-blue") {
     return (
       <Page ctx={ctx} theme={theme} role={slide.role} contentStyle={{ justifyContent: "center", alignItems: "flex-start" }}>
-        <div style={{ display: "flex", width: 120, height: 10, backgroundColor: ctx.accent, borderRadius: 6, marginBottom: 40 }} />
+        <div style={{ display: "flex", width: 120, height: 10, backgroundColor: fioColor(theme.onDark, ctx.accent), borderRadius: 6, marginBottom: 40 }} />
         {slide.kicker ? <Kicker text={slide.kicker} color={theme.onDark ? "#FFFFFF" : ctx.accent} style={{ marginBottom: 28 }} /> : null}
         <div style={{ ...quoteStyle, textAlign: "left" }}>{quote}</div>
         {slide.source ? <SourceLine text={slide.source} color={theme.textSoft} marginTop={40} /> : null}

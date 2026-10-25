@@ -44,6 +44,15 @@ export function em(value: number, fontSize: number): number {
   return Math.round(value * fontSize * 100) / 100;
 }
 
+/**
+ * Cor de um fio/barra de accent que precisa ter contraste com o fundo.
+ * Em temas gradiente (fundo azul/roxo), o accent primário some, então usa
+ * branco a 70%. Em temas claros, usa a própria cor de accent.
+ */
+export function fioColor(onDark: boolean, accent: string): string {
+  return onDark ? "rgba(255,255,255,0.7)" : accent;
+}
+
 /** Resolve o tema do post em cores concretas de fundo e texto. */
 export function resolveTheme(post: Post, tokens: BrandTokens): ThemeResolved {
   switch (post.theme) {

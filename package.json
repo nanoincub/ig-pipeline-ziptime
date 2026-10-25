@@ -8,7 +8,7 @@
   },
   "scripts": {
     "fetch-fonts": "bash scripts/fetch-fonts.sh",
-    "build": "tsc -p tsconfig.json && node dist/cli.js schema",
+    "build": "tsc -p tsconfig.json && node dist/cli.js schema && node dist/check-no-emoji.js",
     "ig-render": "node dist/cli.js",
     "dev": "tsx src/cli.ts"
   },
