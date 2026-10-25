@@ -163,3 +163,34 @@ export function Kicker(props: { text: string; color: string; style?: CSSProperti
     </div>
   );
 }
+
+/** Botão de CTA no estilo cta-save: pílula na cor de accent, texto branco. */
+export function CtaButton(props: { ctx: RenderContext; label: string; icon?: string; style?: CSSProperties }): JSX.Element {
+  const { ctx, label, icon, style } = props;
+  return (
+    <div
+      style={{
+        display: "flex",
+        flexDirection: "row",
+        alignItems: "center",
+        alignSelf: "flex-start",
+        maxWidth: ctx.width - ctx.tokens.safeArea * 2,
+        backgroundColor: ctx.accent,
+        color: "#FFFFFF",
+        borderRadius: ctx.tokens.radius,
+        paddingTop: 28,
+        paddingBottom: 28,
+        paddingLeft: 40,
+        paddingRight: 40,
+        ...style,
+      }}
+    >
+      {icon ? (
+        <div style={{ display: "flex", flexShrink: 0, fontFamily: ctx.tokens.fonts.display, fontWeight: 700, fontSize: 40, marginRight: 20 }}>
+          {icon}
+        </div>
+      ) : null}
+      <div style={{ display: "flex", fontFamily: ctx.tokens.fonts.display, fontWeight: 600, fontSize: 38 }}>{label}</div>
+    </div>
+  );
+}

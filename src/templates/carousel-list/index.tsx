@@ -1,7 +1,7 @@
 import type { CSSProperties } from "react";
 import type { SlideComponentProps, RenderContext, ThemeResolved } from "../shared/types.js";
 import { resolveTheme, coverTitleSize, em, paragraphs } from "../shared/types.js";
-import { Page, Kicker } from "../shared/components.js";
+import { Page, Kicker, CtaButton } from "../shared/components.js";
 
 /**
  * carousel-list — lista numerada.
@@ -165,23 +165,7 @@ function renderClose(slide: SlideComponentProps["slide"], ctx: RenderContext, th
             {slide.title}
           </div>
         ) : null}
-        <div
-          style={{
-            display: "flex",
-            flexDirection: "row",
-            alignItems: "center",
-            backgroundColor: ctx.accent,
-            color: "#FFFFFF",
-            borderRadius: ctx.tokens.radius,
-            paddingTop: 28,
-            paddingBottom: 28,
-            paddingLeft: 40,
-            paddingRight: 40,
-          }}
-        >
-          <div style={{ display: "flex", fontFamily: ctx.tokens.fonts.display, fontWeight: 700, fontSize: 40, marginRight: 20 }}>🔖</div>
-          <div style={{ display: "flex", fontFamily: ctx.tokens.fonts.display, fontWeight: 600, fontSize: 38 }}>{slide.cta ?? "Salve este post"}</div>
-        </div>
+        <CtaButton ctx={ctx} label={slide.cta ?? "Salve este post"} />
       </Page>
     );
   }

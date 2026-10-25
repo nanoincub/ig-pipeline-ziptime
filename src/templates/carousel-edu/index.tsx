@@ -1,7 +1,7 @@
 import type { CSSProperties } from "react";
 import type { SlideComponentProps, RenderContext, ThemeResolved } from "../shared/types.js";
 import { resolveTheme, coverTitleSize, em, paragraphs, lines } from "../shared/types.js";
-import { Page, Kicker } from "../shared/components.js";
+import { Page, Kicker, CtaButton } from "../shared/components.js";
 
 /**
  * carousel-edu — carrossel explicativo.
@@ -155,9 +155,9 @@ function renderBody(slide: SlideComponentProps["slide"], ctx: RenderContext, the
   if (slide.variant === "text-with-bar") {
     return (
       <Page ctx={ctx} theme={theme} role={slide.role} contentStyle={common}>
-        <div style={{ display: "flex", flexDirection: "row", alignItems: "stretch" }}>
-          <div style={{ display: "flex", width: 10, backgroundColor: ctx.accent, borderRadius: 6, marginRight: 36 }} />
-          <div style={{ display: "flex", flexDirection: "column" }}>
+        <div style={{ display: "flex", flexDirection: "row", alignItems: "stretch", width: ctx.width - ctx.tokens.safeArea * 2 }}>
+          <div style={{ display: "flex", flexShrink: 0, width: 10, backgroundColor: ctx.accent, borderRadius: 6, marginRight: 36 }} />
+          <div style={{ display: "flex", flexDirection: "column", flex: 1 }}>
             {slide.kicker ? <Kicker text={slide.kicker} color={theme.onDark ? "#FFFFFF" : ctx.accent} style={{ marginBottom: 20 }} /> : null}
             {slide.title ? <div style={bodyTitleStyle(ctx, theme)}>{slide.title}</div> : null}
             <Paragraphs body={slide.body} theme={theme} ctx={ctx} />
@@ -213,18 +213,20 @@ function renderBody(slide: SlideComponentProps["slide"], ctx: RenderContext, the
 function renderClose(slide: SlideComponentProps["slide"], ctx: RenderContext, theme: ThemeResolved): JSX.Element {
   if (slide.variant === "summary-list") {
     const items = slide.body ? lines(slide.body) : [];
+    const rowWidth = ctx.width - ctx.tokens.safeArea * 2;
     return (
       <Page ctx={ctx} theme={theme} role={slide.role} contentStyle={{ justifyContent: "center", alignItems: "flex-start" }}>
         {slide.kicker ? <Kicker text={slide.kicker} color={theme.onDark ? "#FFFFFF" : ctx.accent} style={{ marginBottom: 20 }} /> : null}
         {slide.title ? <div style={bodyTitleStyle(ctx, theme)}>{slide.title}</div> : null}
-        <div style={{ display: "flex", flexDirection: "column" }}>
+        <div style={{ display: "flex", flexDirection: "column", width: rowWidth }}>
           {items.map((it, i) => (
-            <div key={i} style={{ display: "flex", flexDirection: "row", alignItems: "flex-start", marginBottom: 22 }}>
-              <div style={{ display: "flex", width: 14, height: 14, borderRadius: 7, backgroundColor: ctx.accent, marginTop: 16, marginRight: 24 }} />
+            <div key={i} style={{ display: "flex", flexDirection: "row", alignItems: "flex-start", width: rowWidth, marginBottom: 22 }}>
+              <div style={{ display: "flex", flexShrink: 0, width: 14, height: 14, borderRadius: 7, backgroundColor: ctx.accent, marginTop: 16, marginRight: 24 }} />
               <div style={{ display: "flex", flex: 1, fontFamily: "Inter", fontWeight: 400, fontSize: 36, lineHeight: 1.3, color: theme.text }}>{it}</div>
             </div>
           ))}
         </div>
+        {slide.cta ? <CtaButton ctx={ctx} label={slide.cta} style={{ marginTop: 40 }} /> : null}
       </Page>
     );
   }
@@ -238,23 +240,7 @@ function renderClose(slide: SlideComponentProps["slide"], ctx: RenderContext, th
             {slide.title}
           </div>
         ) : null}
-        <div
-          style={{
-            display: "flex",
-            flexDirection: "row",
-            alignItems: "center",
-            backgroundColor: ctx.accent,
-            color: "#FFFFFF",
-            borderRadius: ctx.tokens.radius,
-            paddingTop: 28,
-            paddingBottom: 28,
-            paddingLeft: 40,
-            paddingRight: 40,
-          }}
-        >
-          <div style={{ display: "flex", fontFamily: ctx.tokens.fonts.display, fontWeight: 700, fontSize: 40, marginRight: 20 }}>🔖</div>
-          <div style={{ display: "flex", fontFamily: ctx.tokens.fonts.display, fontWeight: 600, fontSize: 38 }}>{slide.cta ?? "Salve este post"}</div>
-        </div>
+        <CtaButton ctx={ctx} label={slide.cta ?? "Salve este post"} />
       </Page>
     );
   }

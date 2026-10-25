@@ -148,9 +148,10 @@ A `variant` de cada slide precisa estar na lista do seu `template` + `role`.
     },
     {
       "role": "close",
-      "variant": "cta-save",
-      "kicker": "Leve com você",
-      "title": "Salve para montar seu próximo follow-up",
+      "variant": "summary-list",
+      "kicker": "Resumo",
+      "title": "O follow-up que funciona",
+      "body": "Traga sempre uma informação nova para a conversa\nEspace os contatos: no mesmo dia, em dois dias, em uma semana\nPare de repetir \"conseguiu ver?\"\nInsista: a maioria das vendas vem depois do quinto contato",
       "cta": "Salvar este post"
     }
   ]
