@@ -1,4 +1,5 @@
 import { readFileSync, writeFileSync, existsSync } from "node:fs";
+import { createHash } from "node:crypto";
 import { join } from "node:path";
 import type { Manifest } from "./render.js";
 
@@ -35,6 +36,20 @@ function contentTypeFor(file: string): string {
 }
 
 /**
+ * Insere um hash de conteúdo no nome: `slug-01.png` -> `slug-01-<hash8>.png`.
+ * hash8 = 8 primeiros caracteres do SHA256 do arquivo. Conteúdo idêntico
+ * produz a mesma chave; qualquer mudança gera uma chave nova (contorna o
+ * cache imutável do Worker).
+ */
+function hashedName(file: string, body: Buffer): string {
+  const hash8 = createHash("sha256").update(body).digest("hex").slice(0, 8);
+  const dot = file.lastIndexOf(".");
+  const base = dot === -1 ? file : file.slice(0, dot);
+  const ext = dot === -1 ? "" : file.slice(dot);
+  return `${base}-${hash8}${ext}`;
+}
+
+/**
  * Sobe todos os PNGs de out/<slug>/ (na ordem do manifest) para o Worker,
  * grava urls[] de volta no manifest e retorna as URLs.
  * `log` recebe mensagens de progresso (vão para stderr, nunca stdout).
@@ -60,7 +75,8 @@ export async function uploadSlug(
       throw new Error(`arquivo do manifest ausente em disco: ${filePath}`);
     }
     const body = readFileSync(filePath);
-    const url = `${cfg.endpoint}/upload/${brand}/${slug}/${file}`;
+    const remoteName = hashedName(file, body);
+    const url = `${cfg.endpoint}/upload/${brand}/${slug}/${remoteName}`;
 
     let res: Response;
     try {
@@ -81,7 +97,7 @@ export async function uploadSlug(
       throw new Error(`falha ao subir ${file}: HTTP ${res.status} ${text}`);
     }
     const data = (await res.json()) as { url: string };
-    log(`  ↑ ${file} (${body.byteLength} bytes)`);
+    log(`  ↑ ${remoteName} (${body.byteLength} bytes)`);
     urls.push(data.url);
   }
 

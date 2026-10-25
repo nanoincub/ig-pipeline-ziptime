@@ -24,8 +24,16 @@ entende (flexbox, sem grid, sem `position: sticky`, sem pseudo-elementos).
 ```bash
 pnpm install
 pnpm fetch-fonts   # baixa as .ttf para fonts/
-pnpm build         # compila src/ -> dist/
+pnpm build         # compila src/ -> dist/ e regenera SCHEMA.md
 ```
+
+> **Build scripts (pnpm 10+):** por padrão o pnpm 10 bloqueia postinstall de
+> dependências. `sharp` (binários de imagem) e `esbuild` (usado pelo `tsx`)
+> precisam rodar o seu script de instalação, então estão declarados em
+> `pnpm.onlyBuiltDependencies` no `package.json`. Isso faz o `pnpm install` rodar
+> limpo e sem passo interativo em qualquer ambiente (inclusive containers), sem
+> warning de build ignorado. `@resvg/resvg-js` usa binários pré-compilados e não
+> precisa de build.
 
 ## Uso
 
@@ -48,6 +56,29 @@ node dist/cli.js contact-sheet --out out/
 
 Saída: `out/<slug>/<slug>-<nn>.png` (1080x1350 por padrão) e
 `out/<slug>/manifest.json` com arquivos, dimensões, template e variantes.
+
+### Upload e chave versionada por hash
+
+`upload <slug>` e `pipeline` sobem os PNGs para o Worker `ig-assets` e imprimem as
+URLs públicas (uma por linha, só no stdout). Cada arquivo sobe como
+`<slug>-<nn>-<hash8>.png`, onde `hash8` são os 8 primeiros caracteres do SHA256 do
+PNG:
+
+- conteúdo idêntico → **mesma chave** (idempotente);
+- qualquer mudança no slide → **chave nova**.
+
+O Worker serve com `Cache-Control: public, max-age=31536000, immutable`, então a
+URL nunca precisa ser invalidada: re-renderizar um post com o mesmo slug gera URLs
+novas apenas para os slides que mudaram. Versões antigas permanecem no bucket (sem
+remoção; custo irrelevante). As URLs com hash ficam em `manifest.urls[]`.
+
+Config via `.env` (veja `.env.example`): `IG_UPLOAD_ENDPOINT` e `IG_UPLOAD_TOKEN`.
+
+```bash
+node dist/cli.js upload lista-5-indicadores-semanais --brand ziptime
+node dist/cli.js pipeline posts/lista-5-indicadores-semanais.json   # validate+render+upload
+node dist/cli.js pipeline posts/lista-5-indicadores-semanais.json --no-upload
+```
 
 > O binário também é exposto como `ig-render` (campo `bin`), então
 > `npx ig-render render ...` funciona quando o pacote está linkado/instalado.

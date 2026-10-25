@@ -57,6 +57,18 @@ A `variant` de cada slide precisa estar na lista do seu `template` + `role`.
 - Temas `gradient-*` usam texto branco; `light`/`light-blue` usam texto escuro.
 - Carrosséis mostram contador `n/total` em todos os slides menos a capa.
 
+## Saída
+
+- Render local: `out/<slug>/<slug>-<nn>.png` (nn com dois dígitos) + `out/<slug>/manifest.json`.
+- Upload: cada PNG sobe como `<slug>-<nn>-<hash8>.png`, onde `hash8` são os 8
+  primeiros caracteres do SHA256 do arquivo. Conteúdo idêntico mantém a mesma
+  chave; qualquer mudança gera uma chave nova. Isso contorna o cache imutável do
+  Worker (`max-age=31536000, immutable`): re-renderizar um post com o mesmo slug
+  produz URLs novas só para os slides que mudaram. Versões antigas não são
+  removidas do bucket.
+- As URLs com hash (uma por slide) ficam em `manifest.urls[]` e são o stdout de
+  `ig-render upload` e `ig-render pipeline`.
+
 ## Exemplos completos
 
 ### posts/frase-crm-que-o-time-usa.json
