@@ -121,6 +121,8 @@ export interface Manifest {
   theme: string;
   accent: string;
   files: string[];
+  /** URLs públicas após o upload (preenchido por `ig-render upload`). */
+  urls?: string[];
   variants: { index: number; role: string; variant: string }[];
   dimensions: { width: number; height: number };
   generatedAt: string;

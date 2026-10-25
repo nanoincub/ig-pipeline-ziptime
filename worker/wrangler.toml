@@ -1,0 +1,10 @@
+name = "ig-assets"
+main = "src/index.ts"
+compatibility_date = "2025-10-01"
+
+[[r2_buckets]]
+binding = "BUCKET"
+bucket_name = "ig-assets"
+
+[vars]
+PUBLIC_BASE = "https://ig-assets.desenvolvimento-2bb.workers.dev"

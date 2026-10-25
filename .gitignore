@@ -1,6 +1,7 @@
 node_modules/
 dist/
 out/
+.env
 fonts/*.ttf
 fonts/*.otf
 fonts/*.woff
