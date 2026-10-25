@@ -1,0 +1,37 @@
+{
+  "slug": "ziptime",
+  "name": "Ziptime",
+  "colors": {
+    "primary": "#1B79EE",
+    "hover": "#1565CC",
+    "light": "#E8F2FE",
+    "secondary": "#0C4C9D",
+    "deep": "#062E60",
+    "ink": "#0A1628",
+    "bg": "#FFFFFF",
+    "neutral600": "#6B7280",
+    "neutral400": "#D1D5DB",
+    "neutral100": "#F3F4F6",
+    "success": "#10B981",
+    "warning": "#F59E0B",
+    "danger": "#EF4444",
+    "zipagent": "#6B47DC",
+    "zipagentLight": "#F3EEFF",
+    "zipzap": "#25D366",
+    "zipzapLight": "#E6F7EE"
+  },
+  "gradients": {
+    "hero": "linear-gradient(135deg, #1B79EE 0%, #0C4C9D 100%)",
+    "zipagent": "linear-gradient(135deg, #1B79EE 0%, #6B47DC 100%)"
+  },
+  "fonts": {
+    "display": "Sora",
+    "body": "Inter"
+  },
+  "radius": 24,
+  "signature": {
+    "text": "ziptime.com.br",
+    "handle": "@ziptime"
+  },
+  "safeArea": 80
+}

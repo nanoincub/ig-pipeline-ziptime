@@ -1,0 +1,60 @@
+{
+  "slug": "lista-5-indicadores-semanais",
+  "brand": "ziptime",
+  "template": "carousel-list",
+  "size": "1080x1350",
+  "theme": "light",
+  "accent": "primary",
+  "signature": { "enabled": true, "onlyLastSlide": true },
+  "slides": [
+    {
+      "role": "cover",
+      "variant": "list-title-stack",
+      "kicker": "Gestão comercial",
+      "highlight": "5",
+      "title": "indicadores para olhar toda semana no seu funil"
+    },
+    {
+      "role": "body",
+      "variant": "number-huge",
+      "number": 1,
+      "title": "Oportunidades criadas",
+      "body": "Quantos negócios novos entraram no funil. É o combustível da semana: sem entrada, não há saída."
+    },
+    {
+      "role": "body",
+      "variant": "number-badge",
+      "number": 2,
+      "title": "Taxa de avanço por etapa",
+      "body": "Quantos leads passam de uma etapa para a próxima. Mostra onde o funil trava e onde o discurso convence."
+    },
+    {
+      "role": "body",
+      "variant": "number-side",
+      "number": 3,
+      "title": "Follow-ups atrasados",
+      "body": "Tarefas que venceram e ninguém tocou. Cada atraso aqui é um negócio esfriando em silêncio."
+    },
+    {
+      "role": "body",
+      "variant": "number-huge",
+      "number": 4,
+      "title": "Tempo médio em cada etapa",
+      "body": "Quantos dias um lead fica parado em cada fase. Etapa lenta demais avisa que algo precisa de ajuste."
+    },
+    {
+      "role": "body",
+      "variant": "number-badge",
+      "number": 5,
+      "title": "Previsão de fechamento do mês",
+      "body": "A soma do que tem chance real de fechar. Serve para agir na segunda, não para explicar no dia 30."
+    },
+    {
+      "role": "close",
+      "variant": "cta-simple",
+      "kicker": "Comece agora",
+      "title": "Abra seu funil e confira esses cinco pontos",
+      "cta": "Siga para mais rotinas de gestão"
+    }
+  ]
+}

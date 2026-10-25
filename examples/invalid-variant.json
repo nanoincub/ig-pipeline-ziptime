@@ -1,0 +1,13 @@
+{
+  "slug": "exemplo-invalido",
+  "brand": "ziptime",
+  "template": "carousel-edu",
+  "theme": "light",
+  "slides": [
+    {
+      "role": "cover",
+      "variant": "title-que-nao-existe",
+      "title": "Capa com variante inexistente"
+    }
+  ]
+}

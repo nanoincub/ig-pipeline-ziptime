@@ -1,0 +1,18 @@
+{
+  "slug": "frase-crm-que-o-time-usa",
+  "brand": "ziptime",
+  "template": "quote-card",
+  "size": "1080x1350",
+  "theme": "gradient-hero",
+  "accent": "primary",
+  "signature": { "enabled": true, "onlyLastSlide": false },
+  "slides": [
+    {
+      "role": "cover",
+      "variant": "left-ink-on-blue",
+      "kicker": "CRM na prática",
+      "highlight": "Seu time não usa o CRM porque você pediu para registrar coisa demais.",
+      "source": "Ziptime"
+    }
+  ]
+}

@@ -1,0 +1,60 @@
+{
+  "slug": "carrossel-follow-up-whatsapp",
+  "brand": "ziptime",
+  "template": "carousel-edu",
+  "size": "1080x1350",
+  "theme": "light",
+  "accent": "zipzap",
+  "signature": { "enabled": true, "onlyLastSlide": true },
+  "slides": [
+    {
+      "role": "cover",
+      "variant": "title-big-left",
+      "kicker": "Follow-up",
+      "title": "Como cobrar resposta no WhatsApp sem parecer chato"
+    },
+    {
+      "role": "body",
+      "variant": "text-only",
+      "kicker": "O erro comum",
+      "title": "O problema não é insistir",
+      "body": "O problema é mandar sempre a mesma mensagem: \"oi, tudo bem? conseguiu ver?\".\n\nQuando o follow-up não traz nada novo, o cliente aprende a ignorar."
+    },
+    {
+      "role": "body",
+      "variant": "text-with-highlight",
+      "kicker": "A virada",
+      "title": "Dê um motivo para a pessoa voltar",
+      "highlight": "Todo follow-up precisa carregar uma informação útil.",
+      "body": "Um caso parecido, um prazo que muda, uma dúvida específica. A conversa avança porque você trouxe algo, não porque pediu atenção."
+    },
+    {
+      "role": "body",
+      "variant": "text-with-bar",
+      "kicker": "Ritmo",
+      "title": "Espace os contatos",
+      "body": "No mesmo dia, depois em dois dias, depois em uma semana.\n\nDar espaço mostra que você respeita o tempo do cliente e tira o tom de cobrança."
+    },
+    {
+      "role": "body",
+      "variant": "quote",
+      "highlight": "Follow-up bom parece ajuda. Follow-up ruim parece dívida.",
+      "source": "Ziptime"
+    },
+    {
+      "role": "body",
+      "variant": "big-number",
+      "kicker": "Por que insistir",
+      "highlight": "80%",
+      "title": "das vendas acontecem depois do quinto contato",
+      "body": "A maioria dos vendedores para no segundo. Quem organiza o follow-up fica com o que os outros deixaram na mesa."
+    },
+    {
+      "role": "close",
+      "variant": "cta-save",
+      "kicker": "Leve com você",
+      "title": "Salve para montar seu próximo follow-up",
+      "cta": "Salvar este post"
+    }
+  ]
+}

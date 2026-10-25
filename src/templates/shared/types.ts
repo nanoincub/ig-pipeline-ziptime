@@ -1,0 +1,106 @@
+import type { Post, Slide } from "../../schema.js";
+import type { BrandTokens } from "../../tokens.js";
+
+export interface RenderContext {
+  post: Post;
+  tokens: BrandTokens;
+  /** cor de accent já resolvida em hex */
+  accent: string;
+  /** versão clara da cor de accent (para caixas/realces) */
+  accentLight: string;
+  /** índice 0-based do slide */
+  index: number;
+  total: number;
+  isLast: boolean;
+  width: number;
+  height: number;
+  debug: boolean;
+  /** data URI da imagem de fundo, se o slide tiver background.type=image */
+  bgImageDataUri?: string;
+}
+
+export interface SlideComponentProps {
+  slide: Slide;
+  ctx: RenderContext;
+}
+
+export type TemplateComponent = (props: SlideComponentProps) => JSX.Element;
+
+export interface ThemeResolved {
+  /** cor sólida de fundo (quando não for gradiente) */
+  background: string;
+  /** css de background-image (gradiente), quando aplicável */
+  backgroundImage?: string;
+  /** cor base de texto */
+  text: string;
+  /** cor de texto secundário/suave */
+  textSoft: string;
+  /** true em fundos gradiente (texto claro) */
+  onDark: boolean;
+}
+
+/** em -> px, relativo a um tamanho de fonte (Satori é mais previsível com px). */
+export function em(value: number, fontSize: number): number {
+  return Math.round(value * fontSize * 100) / 100;
+}
+
+/** Resolve o tema do post em cores concretas de fundo e texto. */
+export function resolveTheme(post: Post, tokens: BrandTokens): ThemeResolved {
+  switch (post.theme) {
+    case "light-blue":
+      return {
+        background: tokens.colors.light,
+        text: tokens.colors.ink,
+        textSoft: tokens.colors.neutral600,
+        onDark: false,
+      };
+    case "gradient-hero":
+      return {
+        background: tokens.colors.secondary,
+        backgroundImage: tokens.gradients.hero,
+        text: "#FFFFFF",
+        textSoft: "rgba(255,255,255,0.8)",
+        onDark: true,
+      };
+    case "gradient-zipagent":
+      return {
+        background: tokens.colors.zipagent,
+        backgroundImage: tokens.gradients.zipagent,
+        text: "#FFFFFF",
+        textSoft: "rgba(255,255,255,0.8)",
+        onDark: true,
+      };
+    case "light":
+    default:
+      return {
+        background: tokens.colors.bg,
+        text: tokens.colors.ink,
+        textSoft: tokens.colors.neutral600,
+        onDark: false,
+      };
+  }
+}
+
+/** Tamanho do título de capa por contagem de caracteres. */
+export function coverTitleSize(title: string): number {
+  const len = title.length;
+  if (len <= 40) return 96;
+  if (len <= 70) return 84;
+  return 72;
+}
+
+/** Quebra body em parágrafos (separador \n\n). */
+export function paragraphs(body: string): string[] {
+  return body
+    .split(/\n\n+/)
+    .map((p) => p.trim())
+    .filter(Boolean);
+}
+
+/** Quebra body em itens de lista (um por linha), para summary-list. */
+export function lines(body: string): string[] {
+  return body
+    .split(/\n+/)
+    .map((l) => l.trim())
+    .filter(Boolean);
+}
