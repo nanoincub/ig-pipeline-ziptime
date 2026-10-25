@@ -88,10 +88,15 @@ function bgOverlay(ctx: RenderContext): number {
 export function Signature(props: { ctx: RenderContext; theme: ThemeResolved }): JSX.Element {
   const { ctx, theme } = props;
   const sa = ctx.tokens.safeArea;
+  const logo = ctx.tokens.signature.logoData;
+  // Logo recolorido por tema: branco em gradiente, primary em tema claro.
+  const logoColor = theme.onDark ? "#FFFFFF" : ctx.tokens.colors.primary;
   return (
     <div
       style={{
         display: "flex",
+        flexDirection: "row",
+        alignItems: "center",
         position: "absolute",
         bottom: sa,
         right: sa,
@@ -101,8 +106,30 @@ export function Signature(props: { ctx: RenderContext; theme: ThemeResolved }): 
         color: theme.onDark ? "rgba(255,255,255,0.8)" : ctx.tokens.colors.neutral600,
       }}
     >
-      {ctx.tokens.signature.text}
+      {logo ? <LogoMark logo={logo} color={logoColor} height={28} /> : null}
+      <div style={{ display: "flex" }}>{ctx.tokens.signature.text}</div>
     </div>
+  );
+}
+
+/** Logo da marca como SVG inline (paths recoloridos no render). */
+function LogoMark(props: { logo: { viewBox: string; paths: string[] }; color: string; height: number }): JSX.Element {
+  const [, , vbW, vbH] = props.logo.viewBox.split(/\s+/).map(Number);
+  const ratio = vbW && vbH ? vbW / vbH : 1;
+  const width = Math.round(props.height * ratio);
+  return (
+    <svg
+      width={width}
+      height={props.height}
+      viewBox={props.logo.viewBox}
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+      style={{ marginRight: 12 }}
+    >
+      {props.logo.paths.map((d, i) => (
+        <path key={i} d={d} fill={props.color} />
+      ))}
+    </svg>
   );
 }
 

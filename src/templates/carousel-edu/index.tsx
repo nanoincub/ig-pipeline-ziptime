@@ -154,7 +154,7 @@ function renderBody(slide: SlideComponentProps["slide"], ctx: RenderContext, the
     const q = slide.highlight ?? slide.body ?? "";
     return (
       <Page ctx={ctx} theme={theme} role={slide.role} contentStyle={common}>
-        <div style={{ display: "flex", fontFamily: ctx.tokens.fonts.display, fontWeight: 700, fontSize: 140, lineHeight: 0.6, color: ctx.accent, marginBottom: 24 }}>“</div>
+        <div style={{ display: "flex", fontFamily: ctx.tokens.fonts.display, fontWeight: 700, fontSize: 140, lineHeight: 0.6, color: fioColor(theme.onDark, ctx.accent), marginBottom: 24 }}>“</div>
         <div
           style={{
             display: "flex",

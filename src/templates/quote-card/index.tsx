@@ -43,7 +43,7 @@ export function QuoteCard({ slide, ctx }: SlideComponentProps): JSX.Element {
             fontWeight: 700,
             fontSize: 220,
             lineHeight: 0.7,
-            color: ctx.accent,
+            color: fioColor(theme.onDark, ctx.accent),
             marginBottom: 8,
           }}
         >

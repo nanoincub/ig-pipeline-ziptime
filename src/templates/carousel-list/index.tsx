@@ -31,6 +31,12 @@ function titleStyle(ctx: RenderContext, theme: ThemeResolved, size: number): CSS
 function Body(props: { body?: string; theme: ThemeResolved; ctx: RenderContext }): JSX.Element | null {
   if (!props.body) return null;
   const ps = paragraphs(props.body);
+  // Corpos curtos ficavam no terço superior do slide; aumentamos fonte e
+  // entrelinha para o texto respirar e ocupar mais da altura disponível.
+  const words = props.body.trim().split(/\s+/).filter(Boolean).length;
+  const short = words < 25;
+  const fontSize = short ? 40 : 36;
+  const lineHeight = short ? 1.4 : 1.35;
   return (
     <div style={{ display: "flex", flexDirection: "column", marginTop: 24 }}>
       {ps.map((p, i) => (
@@ -40,8 +46,8 @@ function Body(props: { body?: string; theme: ThemeResolved; ctx: RenderContext }
             display: "flex",
             fontFamily: "Inter",
             fontWeight: 400,
-            fontSize: 36,
-            lineHeight: 1.35,
+            fontSize,
+            lineHeight,
             color: props.theme.text,
             marginBottom: i < ps.length - 1 ? 20 : 0,
           }}
@@ -78,6 +84,11 @@ function renderCover(slide: SlideComponentProps["slide"], ctx: RenderContext, th
   return (
     <Page ctx={ctx} theme={theme} role={slide.role} contentStyle={{ justifyContent: "center", alignItems: "flex-start" }}>
       {slide.kicker ? <Kicker text={slide.kicker} color={theme.onDark ? "#FFFFFF" : ctx.accent} style={{ marginBottom: 28 }} /> : null}
+      {slide.highlight ? (
+        <div style={{ display: "flex", fontFamily: ctx.tokens.fonts.display, fontWeight: 700, fontSize: 200, lineHeight: 0.95, color: ctx.accent, marginBottom: 12 }}>
+          {slide.highlight}
+        </div>
+      ) : null}
       <div style={{ ...titleStyle(ctx, theme, size), textAlign: "left" }}>{title}</div>
       <div style={{ display: "flex", width: 160, height: 10, backgroundColor: fioColor(theme.onDark, ctx.accent), borderRadius: 6, marginTop: 44 }} />
     </Page>
@@ -88,8 +99,9 @@ function renderCover(slide: SlideComponentProps["slide"], ctx: RenderContext, th
 
 function renderBody(slide: SlideComponentProps["slide"], ctx: RenderContext, theme: ThemeResolved): JSX.Element {
   const num = slide.number != null ? String(slide.number) : "";
-  // Topo fixo: o número/conteúdo começa na mesma altura em todos os body slides.
-  const common = { justifyContent: "flex-start", alignItems: "flex-start", paddingTop: ctx.tokens.safeArea + 40 } as CSSProperties;
+  // Bloco número + texto centralizado na vertical: bodies curtos deixavam de
+  // ficar presos no terço superior do slide (ver Body: fonte maior p/ <25 palavras).
+  const common = { justifyContent: "center", alignItems: "flex-start" } as CSSProperties;
   const bodyTitle = (
     <div style={{ display: "flex", fontFamily: ctx.tokens.fonts.display, fontWeight: 600, fontSize: 56, lineHeight: 1.1, letterSpacing: em(-0.01, 56), color: theme.text }}>
       {slide.title ?? ""}

@@ -83,6 +83,36 @@ node dist/cli.js pipeline posts/lista-5-indicadores-semanais.json --no-upload
 > O binário também é exposto como `ig-render` (campo `bin`), então
 > `npx ig-render render ...` funciona quando o pacote está linkado/instalado.
 
+### Publicação no Instagram (Graph API)
+
+`publish <slug>` publica um post já renderizado **e com upload feito** (lê as
+`manifest.urls[]`) no Instagram via Graph API. A versão da API fica em uma
+constante única (`GRAPH_API_VERSION` em `src/publish.ts`), hoje **`v21.0`**.
+
+- **Imagem única:** cria o container (`POST /{IG_USER_ID}/media` com `image_url`
+  + `caption`), faz polling em `GET /{container}?fields=status_code` até
+  `FINISHED` (até 60s, a cada 3s; `ERROR` aborta) e publica
+  (`POST /{IG_USER_ID}/media_publish`).
+- **Carrossel:** um container por imagem (`is_carousel_item=true`) com polling em
+  cada um, depois o container pai (`media_type=CAROUSEL`, `children`), polling e
+  `media_publish`. Máximo de 10 imagens (acima disso falha antes de qualquer chamada).
+- A legenda vem de `--caption-file <path>` ou, por padrão, de
+  `posts/<slug>.caption.txt` (texto puro, hashtags inclusas; até 2.200 caracteres
+  e 30 hashtags).
+- Saída no stdout em JSON de uma linha:
+  `{"media_id":...,"permalink":...,"container_ids":[...]}`.
+- `--dry-run` valida manifest, legenda e credenciais e imprime o plano de chamadas
+  **sem publicar** (funciona sem token real).
+- Em erro da Graph API, imprime `error.message` e `error.code` da Meta e sai com
+  código 1, sem marcar nada como publicado.
+
+Config via `.env` (veja `.env.example`): `IG_USER_ID` e `IG_ACCESS_TOKEN`.
+
+```bash
+node dist/cli.js publish carrossel-follow-up-whatsapp --dry-run
+node dist/cli.js publish carrossel-follow-up-whatsapp --caption-file posts/minha-legenda.txt
+```
+
 ## Formato do Post JSON
 
 ```jsonc
@@ -145,7 +175,8 @@ src/
   tokens.ts                  carrega brands/<slug>.json
   render.ts                  satori + resvg, loop de slides, manifest
   contact-sheet.ts           grade de inspeção + inspeção de PNG
-  cli.ts                     comandos validate / render / contact-sheet
+  publish.ts                 publicação no Instagram via Graph API
+  cli.ts                     comandos validate / render / upload / pipeline / publish / contact-sheet / schema
   templates/
     index.ts                 registry slug -> componente
     shared/                  Page, Signature, SlideCounter, Kicker, tipografia

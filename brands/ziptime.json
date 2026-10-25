@@ -31,7 +31,8 @@
   "radius": 24,
   "signature": {
     "text": "ziptime.com.br",
-    "handle": "@ziptime"
+    "handle": "@ziptime",
+    "logo": "ziptime/logo.svg"
   },
   "safeArea": 80
 }

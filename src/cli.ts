@@ -9,6 +9,15 @@ import { loadBrand, type BrandTokens } from "./tokens.js";
 import { loadFonts, renderPost, listPosts, type SatoriFont, type Manifest } from "./render.js";
 import { buildContactSheet, collectSlidePngs } from "./contact-sheet.js";
 import { loadUploadConfig, uploadSlug } from "./upload.js";
+import {
+  loadPublishConfig,
+  loadManifestUrls,
+  validateCaption,
+  buildPlan,
+  publishPost,
+  GraphApiError,
+  GRAPH_API_VERSION,
+} from "./publish.js";
 import { generateSchemaMd, missingVariants } from "./schema-doc.js";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
@@ -155,6 +164,74 @@ program
       for (const u of urls) process.stdout.write(u + "\n");
     } catch (err) {
       logErr(`✗ ${(err as Error).message}`);
+      process.exit(1);
+    }
+  });
+
+// ---------- publish ----------
+program
+  .command("publish")
+  .argument("<slug>", "slug do post já renderizado e com upload feito (out/<slug>/)")
+  .option("--caption-file <path>", "arquivo de legenda (padrão: posts/<slug>.caption.txt)")
+  .option("--dry-run", "valida e imprime o plano de chamadas sem publicar")
+  .option("-o, --out <dir>", "diretório de saída", "out")
+  .description(`publica no Instagram via Graph API ${GRAPH_API_VERSION} (imagem única ou carrossel)`)
+  .action(async (slug: string, options: { captionFile?: string; dryRun?: boolean; out: string }) => {
+    try {
+      const outRoot = resolve(process.cwd(), options.out);
+      const { urls } = loadManifestUrls(slug, outRoot);
+
+      const captionPath = options.captionFile
+        ? resolve(process.cwd(), options.captionFile)
+        : join(POSTS_DIR, `${slug}.caption.txt`);
+      if (!existsSync(captionPath)) {
+        throw new Error(
+          `legenda não encontrada: ${captionPath}. Use --caption-file ou crie posts/${slug}.caption.txt.`
+        );
+      }
+      const caption = readFileSync(captionPath, "utf8").trim();
+      const { chars, hashtags } = validateCaption(caption);
+
+      const { config, missing } = loadPublishConfig();
+      const isCarousel = urls.length > 1;
+
+      if (options.dryRun) {
+        const plan = buildPlan(config?.userId ?? "{IG_USER_ID}", urls);
+        logErr(`Plano de publicação (dry-run) — ${slug}`);
+        logErr(`  tipo: ${isCarousel ? `carrossel (${urls.length} imagens)` : "imagem única"}`);
+        logErr(`  legenda: ${chars} caracteres, ${hashtags} hashtags  [${captionPath}]`);
+        logErr(`  containers: ${isCarousel ? `${urls.length} filhos + 1 pai` : "1"}`);
+        logErr(`  credenciais: ${missing.length ? `AUSENTES (${missing.join(", ")})` : "presentes"}`);
+        logErr(`  chamadas (${plan.length}):`);
+        plan.forEach((s, i) =>
+          logErr(`   ${String(i + 1).padStart(2, "0")}. ${s.method} ${s.url}${s.note ? `   # ${s.note}` : ""}`)
+        );
+        process.stdout.write(
+          JSON.stringify({
+            dry_run: true,
+            slug,
+            type: isCarousel ? "carousel" : "image",
+            images: urls.length,
+            containers: isCarousel ? { children: urls.length, parent: 1 } : { single: 1 },
+            caption: { chars, hashtags },
+            credentials: missing.length ? "missing" : "present",
+            calls: plan.length,
+          }) + "\n"
+        );
+        return;
+      }
+
+      if (!config) {
+        throw new Error(`credenciais ausentes: ${missing.join(", ")}. Defina em .env (veja .env.example).`);
+      }
+      const result = await publishPost(config, urls, caption, logErr);
+      process.stdout.write(JSON.stringify(result) + "\n");
+    } catch (err) {
+      if (err instanceof GraphApiError) {
+        logErr(`✗ Graph API erro${err.code != null ? ` (code ${err.code})` : ""}: ${err.message}`);
+      } else {
+        logErr(`✗ ${(err as Error).message}`);
+      }
       process.exit(1);
     }
   });
