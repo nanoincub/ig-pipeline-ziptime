@@ -89,6 +89,11 @@ node dist/cli.js pipeline posts/lista-5-indicadores-semanais.json --no-upload
 `manifest.urls[]`) no Instagram via Graph API. A versão da API fica em uma
 constante única (`GRAPH_API_VERSION` em `src/publish.ts`), hoje **`v21.0`**.
 
+A conta usa **"Instagram API with Instagram Login"**, cujo host é
+**`graph.instagram.com`** (default). O host é configurável via `IG_GRAPH_HOST`
+no `.env` (use `graph.facebook.com` para o caminho *Instagram API with Facebook
+Login*).
+
 - **Imagem única:** cria o container (`POST /{IG_USER_ID}/media` com `image_url`
   + `caption`), faz polling em `GET /{container}?fields=status_code` até
   `FINISHED` (até 60s, a cada 3s; `ERROR` aborta) e publica
@@ -106,7 +111,14 @@ constante única (`GRAPH_API_VERSION` em `src/publish.ts`), hoje **`v21.0`**.
 - Em erro da Graph API, imprime `error.message` e `error.code` da Meta e sai com
   código 1, sem marcar nada como publicado.
 
-Config via `.env` (veja `.env.example`): `IG_USER_ID` e `IG_ACCESS_TOKEN`.
+Config via `.env` (veja `.env.example`): `IG_USER_ID`, `IG_ACCESS_TOKEN` e,
+opcionalmente, `IG_GRAPH_HOST`.
+
+**Renovação do token** (Instagram Login, tokens de longa duração expiram em ~60
+dias): renove com
+`GET https://graph.instagram.com/refresh_access_token?grant_type=ig_refresh_token&access_token=<token-atual>`
+(o token precisa ter ao menos 24h de vida). A resposta traz um novo
+`access_token` para gravar em `IG_ACCESS_TOKEN`.
 
 ```bash
 node dist/cli.js publish carrossel-follow-up-whatsapp --dry-run

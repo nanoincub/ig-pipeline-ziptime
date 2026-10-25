@@ -11,7 +11,23 @@ import type { Manifest } from "./render.js";
 
 /** Versão única da Graph API usada por todas as chamadas (documentada no README). */
 export const GRAPH_API_VERSION = "v21.0";
-export const GRAPH_BASE = `https://graph.facebook.com/${GRAPH_API_VERSION}`;
+
+/**
+ * Host da Graph API. A conta usa "Instagram API with Instagram Login", cujo
+ * host é graph.instagram.com (default). Configurável via IG_GRAPH_HOST para
+ * permitir o caminho graph.facebook.com (Instagram API with Facebook Login).
+ */
+export function graphHost(): string {
+  return (process.env.IG_GRAPH_HOST ?? "graph.instagram.com")
+    .trim()
+    .replace(/^https?:\/\//, "")
+    .replace(/\/+$/, "");
+}
+
+/** URL base das chamadas: https://<host>/<versão>. */
+export function graphBase(): string {
+  return `https://${graphHost()}/${GRAPH_API_VERSION}`;
+}
 
 export const MAX_CAROUSEL = 10;
 export const CAPTION_MAX_CHARS = 2200;
@@ -90,23 +106,24 @@ export interface PlanStep {
 
 /** Plano de chamadas (para --dry-run), sem executar nada. */
 export function buildPlan(userId: string, urls: string[]): PlanStep[] {
-  const base = `${GRAPH_BASE}/${userId}`;
+  const gb = graphBase();
+  const base = `${gb}/${userId}`;
   const steps: PlanStep[] = [];
   if (urls.length === 1) {
     steps.push({ method: "POST", url: `${base}/media`, note: `image_url + caption` });
-    steps.push({ method: "GET", url: `${GRAPH_BASE}/{container-id}?fields=status_code`, note: "polling até FINISHED" });
+    steps.push({ method: "GET", url: `${gb}/{container-id}?fields=status_code`, note: "polling até FINISHED" });
     steps.push({ method: "POST", url: `${base}/media_publish`, note: "creation_id={container-id}" });
-    steps.push({ method: "GET", url: `${GRAPH_BASE}/{media-id}?fields=permalink` });
+    steps.push({ method: "GET", url: `${gb}/{media-id}?fields=permalink` });
     return steps;
   }
   urls.forEach((_, i) => {
     steps.push({ method: "POST", url: `${base}/media`, note: `[filho ${i + 1}/${urls.length}] is_carousel_item=true + image_url` });
-    steps.push({ method: "GET", url: `${GRAPH_BASE}/{child-${i + 1}}?fields=status_code`, note: "polling até FINISHED" });
+    steps.push({ method: "GET", url: `${gb}/{child-${i + 1}}?fields=status_code`, note: "polling até FINISHED" });
   });
   steps.push({ method: "POST", url: `${base}/media`, note: `[pai] media_type=CAROUSEL children=<${urls.length} ids> + caption` });
-  steps.push({ method: "GET", url: `${GRAPH_BASE}/{parent-id}?fields=status_code`, note: "polling até FINISHED" });
+  steps.push({ method: "GET", url: `${gb}/{parent-id}?fields=status_code`, note: "polling até FINISHED" });
   steps.push({ method: "POST", url: `${base}/media_publish`, note: "creation_id={parent-id}" });
-  steps.push({ method: "GET", url: `${GRAPH_BASE}/{media-id}?fields=permalink` });
+  steps.push({ method: "GET", url: `${gb}/{media-id}?fields=permalink` });
   return steps;
 }
 
@@ -133,7 +150,7 @@ async function graphCall(url: string, init: RequestInit): Promise<Record<string,
 /** Cria um container de mídia e retorna seu id. */
 async function createMedia(cfg: PublishConfig, params: Record<string, string>): Promise<string> {
   const body = new URLSearchParams({ ...params, access_token: cfg.accessToken });
-  const json = await graphCall(`${GRAPH_BASE}/${cfg.userId}/media`, { method: "POST", body });
+  const json = await graphCall(`${graphBase()}/${cfg.userId}/media`, { method: "POST", body });
   return String(json.id);
 }
 
@@ -141,7 +158,7 @@ async function createMedia(cfg: PublishConfig, params: Record<string, string>): 
 async function pollContainer(cfg: PublishConfig, containerId: string, log: (m: string) => void): Promise<void> {
   const deadline = Date.now() + POLL_TIMEOUT_MS;
   while (Date.now() < deadline) {
-    const url = `${GRAPH_BASE}/${containerId}?fields=status_code&access_token=${encodeURIComponent(cfg.accessToken)}`;
+    const url = `${graphBase()}/${containerId}?fields=status_code&access_token=${encodeURIComponent(cfg.accessToken)}`;
     const json = await graphCall(url, { method: "GET" });
     const status = String(json.status_code ?? "");
     if (status === "FINISHED") return;
@@ -155,13 +172,13 @@ async function pollContainer(cfg: PublishConfig, containerId: string, log: (m: s
 /** Publica um container já FINISHED e retorna o media_id. */
 async function mediaPublish(cfg: PublishConfig, creationId: string): Promise<string> {
   const body = new URLSearchParams({ creation_id: creationId, access_token: cfg.accessToken });
-  const json = await graphCall(`${GRAPH_BASE}/${cfg.userId}/media_publish`, { method: "POST", body });
+  const json = await graphCall(`${graphBase()}/${cfg.userId}/media_publish`, { method: "POST", body });
   return String(json.id);
 }
 
 /** Busca o permalink de uma mídia publicada. */
 async function getPermalink(cfg: PublishConfig, mediaId: string): Promise<string | null> {
-  const url = `${GRAPH_BASE}/${mediaId}?fields=permalink&access_token=${encodeURIComponent(cfg.accessToken)}`;
+  const url = `${graphBase()}/${mediaId}?fields=permalink&access_token=${encodeURIComponent(cfg.accessToken)}`;
   const json = await graphCall(url, { method: "GET" });
   return (json.permalink as string) ?? null;
 }

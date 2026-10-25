@@ -17,6 +17,7 @@ import {
   publishPost,
   GraphApiError,
   GRAPH_API_VERSION,
+  graphHost,
 } from "./publish.js";
 import { generateSchemaMd, missingVariants } from "./schema-doc.js";
 
@@ -198,6 +199,7 @@ program
       if (options.dryRun) {
         const plan = buildPlan(config?.userId ?? "{IG_USER_ID}", urls);
         logErr(`Plano de publicação (dry-run) — ${slug}`);
+        logErr(`  host: ${graphHost()} (Graph API ${GRAPH_API_VERSION})`);
         logErr(`  tipo: ${isCarousel ? `carrossel (${urls.length} imagens)` : "imagem única"}`);
         logErr(`  legenda: ${chars} caracteres, ${hashtags} hashtags  [${captionPath}]`);
         logErr(`  containers: ${isCarousel ? `${urls.length} filhos + 1 pai` : "1"}`);
