@@ -20,6 +20,7 @@ import {
   graphHost,
 } from "./publish.js";
 import { generateSchemaMd, missingVariants } from "./schema-doc.js";
+import { setBrandToken, getBrandStatus, formatStatusTable } from "./token.js";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const REPO_ROOT = join(__dirname, "..");
@@ -265,6 +266,40 @@ program
       process.exit(1);
     }
     logErr(`✓ SCHEMA.md gerado em ${dest} (todas as variantes presentes).`);
+  });
+
+// ---------- token:set ----------
+program
+  .command("token:set")
+  .argument("<brand>", "marca (kebab-case)")
+  .description("cadastra/atualiza o token do Instagram da marca no worker (lê IG_ACCESS_TOKEN/IG_USER_ID do .env)")
+  .action(async (brand: string) => {
+    try {
+      const status = await setBrandToken(brand);
+      logErr(`✓ token da marca "${brand}" gravado no worker.`);
+      logErr(formatStatusTable(status));
+      if (status.last_error) {
+        logErr(`  ⚠ refresh pendente — ${status.last_error.code}: ${status.last_error.message}`);
+      }
+    } catch (err) {
+      logErr(`✗ ${(err as Error).message}`);
+      process.exit(1);
+    }
+  });
+
+// ---------- token:status ----------
+program
+  .command("token:status")
+  .argument("<brand>", "marca (kebab-case)")
+  .description("mostra o status do token da marca (expiração, última renovação) — sem exibir o token")
+  .action(async (brand: string) => {
+    try {
+      const status = await getBrandStatus(brand);
+      logErr(formatStatusTable(status));
+    } catch (err) {
+      logErr(`✗ ${(err as Error).message}`);
+      process.exit(1);
+    }
   });
 
 program.parseAsync(process.argv);

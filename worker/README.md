@@ -13,6 +13,23 @@ Upload autenticado e entrega pública de criativos em um bucket R2.
 | `GET /health` | pública | `200 ok`. |
 | `OPTIONS *` | pública | Preflight CORS (`*`, métodos PUT/POST/GET, headers `Authorization`/`Content-Type`). |
 
+### Cofre de tokens do Instagram por marca
+
+Tokens de longa duração do Instagram guardados no KV `IG_TOKENS` (chave = `{brand}`),
+renovados automaticamente pelo `scheduled()` via Cron **`0 9 * * 1`** (segunda, 06:00 BRT).
+Estas rotas **nunca** aparecem no `/openapi.json`.
+
+| Método + rota | Auth | Descrição |
+|---|---|---|
+| `PUT /token/{brand}` | Bearer `ADMIN_TOKEN` | Cadastra/atualiza (`{access_token, user_id}`), valida com `?fields=username` e já renova. |
+| `POST /token/{brand}/refresh` | Bearer `ADMIN_TOKEN` | Força a renovação. |
+| `GET /token/{brand}` | Bearer `UPLOAD_TOKEN` ou `ADMIN_TOKEN` | `{access_token, user_id, expires_at}`. |
+| `GET /token/{brand}/status` | Bearer `UPLOAD_TOKEN` ou `ADMIN_TOKEN` | Status **sem token** (`username`, `expires_at`, `days_left`, `refreshed_at`, `last_error`). |
+
+Sem Bearer → `401`. Bearer errado para a rota → `403`. Marca inexistente → `404`.
+Em falha de renovação, o token anterior é mantido e `last_error` (código + mensagem,
+sem token) é gravado. Fluxo de uso e CLI (`token:set` / `token:status`) no README raiz.
+
 `brand` e `slug` seguem `^[a-z0-9][a-z0-9-]*$`; `file` deve terminar em `.png`, `.jpg` ou `.mp4`.
 Tipos aceitos: `image/png`, `image/jpeg`, `video/mp4`. Limite de **25 MB** (binário no PUT, já decodificado no `/upload-json`).
 
@@ -24,11 +41,15 @@ pnpm install
 pnpm run deploy        # wrangler deploy
 ```
 
-Segredo necessário (não versionado):
+Segredos necessários (não versionados):
 
 ```bash
-wrangler secret put UPLOAD_TOKEN
+wrangler secret put UPLOAD_TOKEN          # upload e leitura de token/status
+openssl rand -hex 32 | wrangler secret put ADMIN_TOKEN   # administração do cofre de tokens
 ```
+
+O binding KV `IG_TOKENS` e o Cron `0 9 * * 1` já estão no `wrangler.toml`. Para uma
+conta nova, crie o namespace com `wrangler kv namespace create IG_TOKENS` e ajuste o `id`.
 
 ## `POST /upload-json`
 

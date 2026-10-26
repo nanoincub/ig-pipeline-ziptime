@@ -125,6 +125,55 @@ node dist/cli.js publish carrossel-follow-up-whatsapp --dry-run
 node dist/cli.js publish carrossel-follow-up-whatsapp --caption-file posts/minha-legenda.txt
 ```
 
+### Token do Instagram por marca (cofre no worker)
+
+O token de longa duração do Instagram **não fica mais em arquivo nem no Notion**:
+mora no **KV do worker `ig-assets`** (namespace `IG_TOKENS`), uma entrada por
+marca (`chave = {brand}`). O próprio worker **renova o token toda semana** por
+Cron Trigger — **`0 9 * * 1`** (segunda, 06:00 BRT) — e as skills leem o token
+direto pelo endpoint, sem nunca exibi-lo.
+
+Cada entrada guarda `{access_token, user_id, username, expires_at, refreshed_at,
+last_error}`. A renovação chama
+`GET /refresh_access_token?grant_type=ig_refresh_token` em `graph.instagram.com`,
+valida o token novo com `?fields=username` e grava `expires_at = agora +
+expires_in`. Em qualquer falha, **mantém o token anterior** e registra `last_error`
+(código + mensagem, sem o token).
+
+**Endpoints** (no worker; **não** aparecem no `/openapi.json`):
+
+| Método + rota | Auth | Devolve |
+|---|---|---|
+| `PUT /token/{brand}` | Bearer `ADMIN_TOKEN` | cadastra/atualiza (corpo `{access_token, user_id}`), valida e já renova |
+| `POST /token/{brand}/refresh` | Bearer `ADMIN_TOKEN` | força a renovação |
+| `GET /token/{brand}` | Bearer `UPLOAD_TOKEN` ou `ADMIN_TOKEN` | `{access_token, user_id, expires_at}` |
+| `GET /token/{brand}/status` | Bearer `UPLOAD_TOKEN` ou `ADMIN_TOKEN` | status **sem token** (`username`, `expires_at`, `days_left`, `last_error`…) |
+
+Sem Bearer → `401`. Bearer errado para a rota → `403`. Marca inexistente → `404`.
+
+**CLI:**
+
+```bash
+# cadastra/renova o token da marca (lê IG_ACCESS_TOKEN, IG_USER_ID, IG_ADMIN_TOKEN do .env)
+node dist/cli.js token:set ziptime
+
+# status do token (expiração, dias restantes, última renovação) — nunca mostra o token
+node dist/cli.js token:status ziptime
+```
+
+**Clonar para uma marca nova:**
+
+1. Copie `.env.example` para `.env` e preencha `IG_UPLOAD_ENDPOINT`,
+   `IG_UPLOAD_TOKEN`, `IG_ADMIN_TOKEN` (= secret `ADMIN_TOKEN` do worker) e, para a
+   marca a cadastrar, `IG_USER_ID` + `IG_ACCESS_TOKEN` (token de longa duração,
+   obtido via Instagram Login).
+2. Rode `node dist/cli.js token:set <brand>`. A partir daí o Cron renova sozinho;
+   acompanhe com `token:status <brand>`.
+
+> O `ADMIN_TOKEN` do worker é gerado com `openssl rand -hex 32` e gravado com
+> `wrangler secret put ADMIN_TOKEN` (nunca versionado). Detalhes do worker em
+> [`worker/README.md`](worker/README.md).
+
 ## Formato do Post JSON
 
 ```jsonc

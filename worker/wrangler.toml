@@ -6,5 +6,14 @@ compatibility_date = "2025-10-01"
 binding = "BUCKET"
 bucket_name = "ig-assets"
 
+# Tokens do Instagram por marca (chave = {brand}). Renovados pelo scheduled().
+[[kv_namespaces]]
+binding = "IG_TOKENS"
+id = "9f9bf488b54e4bc9b96f0cdad5516efe"
+
+# Renovação semanal: segunda 09:00 UTC (06:00 BRT).
+[triggers]
+crons = ["0 9 * * 1"]
+
 [vars]
 PUBLIC_BASE = "https://ig-assets.desenvolvimento-2bb.workers.dev"
