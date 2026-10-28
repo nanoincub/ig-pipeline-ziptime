@@ -1,7 +1,7 @@
 import type { CSSProperties } from "react";
 import type { SlideComponentProps, RenderContext, ThemeResolved } from "../shared/types.js";
 import { resolveTheme, coverTitleSize, em, paragraphs, lines, fioColor } from "../shared/types.js";
-import { Page, Kicker, CtaButton } from "../shared/components.js";
+import { Page, Kicker, CtaButton, BigNumber } from "../shared/components.js";
 
 /**
  * carousel-edu — carrossel explicativo.
@@ -62,19 +62,13 @@ function renderCover(slide: SlideComponentProps["slide"], ctx: RenderContext, th
   if (slide.variant === "title-with-number") {
     return (
       <Page ctx={ctx} theme={theme} role={slide.role} contentStyle={{ justifyContent: "center", alignItems: "flex-start" }}>
-        <div
-          style={{
-            display: "flex",
-            fontFamily: ctx.tokens.fonts.display,
-            fontWeight: 700,
-            fontSize: 160,
-            lineHeight: 1,
-            color: ctx.accent,
-            marginBottom: 12,
-          }}
-        >
-          {slide.number != null ? String(slide.number) : "01"}
-        </div>
+        <BigNumber
+          ctx={ctx}
+          value={slide.number != null ? String(slide.number) : "01"}
+          fontSize={160}
+          lineHeight={1}
+          style={{ marginBottom: 12 }}
+        />
         {slide.kicker ? <Kicker theme={theme} text={slide.kicker} color={theme.onDark ? "#FFFFFF" : ctx.accentTextLight} style={{ marginBottom: 20 }} /> : null}
         <div style={{ ...titleStyle, textAlign: "left" }}>{title}</div>
       </Page>
@@ -141,9 +135,7 @@ function renderBody(slide: SlideComponentProps["slide"], ctx: RenderContext, the
     return (
       <Page ctx={ctx} theme={theme} role={slide.role} contentStyle={common}>
         {slide.kicker ? <Kicker theme={theme} text={slide.kicker} color={theme.onDark ? "#FFFFFF" : ctx.accentTextLight} style={{ marginBottom: 20 }} /> : null}
-        <div style={{ display: "flex", fontFamily: ctx.tokens.fonts.display, fontWeight: 700, fontSize: 180, lineHeight: 1, color: ctx.accent, marginBottom: 24 }}>
-          {big}
-        </div>
+        <BigNumber ctx={ctx} value={big} fontSize={180} lineHeight={1} style={{ marginBottom: 24 }} />
         {slide.title ? <div style={bodyTitleStyle(ctx, theme)}>{slide.title}</div> : null}
         <Paragraphs body={slide.body} theme={theme} ctx={ctx} />
       </Page>

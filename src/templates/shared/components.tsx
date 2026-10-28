@@ -105,7 +105,7 @@ export function Signature(props: { ctx: RenderContext; theme: ThemeResolved }): 
         fontFamily: ctx.tokens.fonts.display,
         fontWeight: 600,
         fontSize: 26,
-        color: theme.onDark ? "rgba(255,255,255,0.8)" : ctx.tokens.colors.neutral600,
+        color: theme.onDark ? "rgba(255,255,255,0.8)" : theme.textSoft,
       }}
     >
       {mark ? <LogoMark logo={mark} height={28} /> : null}
@@ -148,7 +148,7 @@ export function SlideCounter(props: { ctx: RenderContext; theme: ThemeResolved }
         fontFamily: ctx.tokens.fonts.body,
         fontWeight: 400,
         fontSize: 24,
-        color: theme.onDark ? "rgba(255,255,255,0.8)" : ctx.tokens.colors.neutral600,
+        color: theme.onDark ? "rgba(255,255,255,0.8)" : theme.textSoft,
       }}
     >
       {ctx.index + 1}/{ctx.total}
@@ -194,6 +194,51 @@ export function Kicker(props: { theme: ThemeResolved; text: string; color: strin
 }
 
 /**
+ * Número grande de display. A cor vem de `ctx.numberColor` (ink quando o accent é
+ * superfície ou no tema yellow; senão o accent). Para accents-superfície (ciano)
+ * pinta uma marca-texto `ctx.numberSurface` atrás da metade inferior do glifo, com
+ * o radius da marca. Sem superfície, renderiza um único <div> idêntico ao anterior
+ * (mantém o render dos posts existentes byte-a-byte). `style` leva margens/flexShrink.
+ */
+export function BigNumber(props: {
+  ctx: RenderContext;
+  value: string;
+  fontSize: number;
+  lineHeight: number;
+  style?: CSSProperties;
+}): JSX.Element {
+  const { ctx } = props;
+  const numStyle: CSSProperties = {
+    display: "flex",
+    fontFamily: ctx.tokens.fonts.display,
+    fontWeight: 700,
+    fontSize: props.fontSize,
+    lineHeight: props.lineHeight,
+    color: ctx.numberColor,
+  };
+  if (!ctx.numberSurface) {
+    return <div style={{ ...numStyle, ...props.style }}>{props.value}</div>;
+  }
+  return (
+    <div style={{ display: "flex", position: "relative", ...props.style }}>
+      <div
+        style={{
+          display: "flex",
+          position: "absolute",
+          left: 0,
+          right: 0,
+          bottom: Math.round(props.fontSize * 0.08),
+          height: Math.round(props.fontSize * 0.42),
+          backgroundColor: ctx.numberSurface,
+          borderRadius: Math.min(ctx.tokens.radius, 16),
+        }}
+      />
+      <div style={{ ...numStyle, position: "relative" }}>{props.value}</div>
+    </div>
+  );
+}
+
+/**
  * Ícone de bookmark como SVG inline (Satori renderiza <svg>/<path> nativamente;
  * sem emoji, sem <img> aninhado). Traço 2px na cor informada.
  */
@@ -224,7 +269,7 @@ export function CtaButton(props: { ctx: RenderContext; label: string; bookmark?:
         alignSelf: "flex-start",
         maxWidth: ctx.width - ctx.tokens.safeArea * 2,
         backgroundColor: ctx.accent,
-        color: "#FFFFFF",
+        color: ctx.onAccentText,
         borderRadius: ctx.tokens.radius,
         paddingTop: 28,
         paddingBottom: 28,
@@ -235,8 +280,8 @@ export function CtaButton(props: { ctx: RenderContext; label: string; bookmark?:
     >
       {bookmark ? (
         <div style={{ display: "flex", flexShrink: 0, marginRight: 18 }}>
-          {/* branco para contrastar com a pílula accent (accent-sobre-accent seria invisível) */}
-          <BookmarkIcon color="#FFFFFF" size={38} />
+          {/* mesma cor do rótulo (branco na pílula de accent; ink quando o accent é superfície). */}
+          <BookmarkIcon color={ctx.onAccentText} size={38} />
         </div>
       ) : null}
       <div style={{ display: "flex", fontFamily: ctx.tokens.fonts.display, fontWeight: 600, fontSize: 38 }}>{label}</div>

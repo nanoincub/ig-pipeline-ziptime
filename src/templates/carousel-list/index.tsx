@@ -1,7 +1,7 @@
 import type { CSSProperties } from "react";
 import type { SlideComponentProps, RenderContext, ThemeResolved } from "../shared/types.js";
 import { resolveTheme, coverTitleSize, em, paragraphs, fioColor } from "../shared/types.js";
-import { Page, Kicker, CtaButton } from "../shared/components.js";
+import { Page, Kicker, CtaButton, BigNumber } from "../shared/components.js";
 
 /**
  * carousel-list — lista numerada.
@@ -71,9 +71,7 @@ function renderCover(slide: SlideComponentProps["slide"], ctx: RenderContext, th
       <Page ctx={ctx} theme={theme} role={slide.role} contentStyle={{ justifyContent: "flex-start", alignItems: "flex-start" }}>
         {slide.kicker ? <Kicker theme={theme} text={slide.kicker} color={theme.onDark ? "#FFFFFF" : ctx.accentTextLight} style={{ marginTop: 20, marginBottom: 24 }} /> : null}
         {slide.highlight ? (
-          <div style={{ display: "flex", fontFamily: ctx.tokens.fonts.display, fontWeight: 700, fontSize: 200, lineHeight: 0.95, color: ctx.accent, marginBottom: 8 }}>
-            {slide.highlight}
-          </div>
+          <BigNumber ctx={ctx} value={slide.highlight} fontSize={200} lineHeight={0.95} style={{ marginBottom: 8 }} />
         ) : null}
         <div style={{ ...titleStyle(ctx, theme, size), textAlign: "left" }}>{title}</div>
       </Page>
@@ -85,9 +83,7 @@ function renderCover(slide: SlideComponentProps["slide"], ctx: RenderContext, th
     <Page ctx={ctx} theme={theme} role={slide.role} contentStyle={{ justifyContent: "center", alignItems: "flex-start" }}>
       {slide.kicker ? <Kicker theme={theme} text={slide.kicker} color={theme.onDark ? "#FFFFFF" : ctx.accentTextLight} style={{ marginBottom: 28 }} /> : null}
       {slide.highlight ? (
-        <div style={{ display: "flex", fontFamily: ctx.tokens.fonts.display, fontWeight: 700, fontSize: 200, lineHeight: 0.95, color: ctx.accent, marginBottom: 12 }}>
-          {slide.highlight}
-        </div>
+        <BigNumber ctx={ctx} value={slide.highlight} fontSize={200} lineHeight={0.95} style={{ marginBottom: 12 }} />
       ) : null}
       <div style={{ ...titleStyle(ctx, theme, size), textAlign: "left" }}>{title}</div>
       <div style={{ display: "flex", width: 160, height: 10, backgroundColor: fioColor(theme.onDark, ctx.accent), borderRadius: 6, marginTop: 44 }} />
@@ -120,7 +116,7 @@ function renderBody(slide: SlideComponentProps["slide"], ctx: RenderContext, the
             height: 128,
             borderRadius: 64,
             backgroundColor: ctx.accent,
-            color: "#FFFFFF",
+            color: ctx.onAccentText,
             fontFamily: ctx.tokens.fonts.display,
             fontWeight: 700,
             fontSize: 64,
@@ -141,9 +137,7 @@ function renderBody(slide: SlideComponentProps["slide"], ctx: RenderContext, the
     return (
       <Page ctx={ctx} theme={theme} role={slide.role} contentStyle={common}>
         <div style={{ display: "flex", flexDirection: "row", alignItems: "flex-start", width: rowWidth }}>
-          <div style={{ display: "flex", flexShrink: 0, fontFamily: ctx.tokens.fonts.display, fontWeight: 700, fontSize: 150, lineHeight: 0.9, color: ctx.accent, marginRight: 40 }}>
-            {num}
-          </div>
+          <BigNumber ctx={ctx} value={num} fontSize={150} lineHeight={0.9} style={{ flexShrink: 0, marginRight: 40 }} />
           <div style={{ display: "flex", flexDirection: "column", flex: 1, paddingTop: 12 }}>
             {slide.kicker ? <Kicker theme={theme} text={slide.kicker} color={theme.onDark ? "#FFFFFF" : ctx.accentTextLight} style={{ marginBottom: 16 }} /> : null}
             {bodyTitle}
@@ -157,9 +151,7 @@ function renderBody(slide: SlideComponentProps["slide"], ctx: RenderContext, the
   // number-huge (default)
   return (
     <Page ctx={ctx} theme={theme} role={slide.role} contentStyle={common}>
-      <div style={{ display: "flex", fontFamily: ctx.tokens.fonts.display, fontWeight: 700, fontSize: 180, lineHeight: 1, color: ctx.accent, marginBottom: 12 }}>
-        {num}
-      </div>
+      <BigNumber ctx={ctx} value={num} fontSize={180} lineHeight={1} style={{ marginBottom: 12 }} />
       {slide.kicker ? <Kicker theme={theme} text={slide.kicker} color={theme.onDark ? "#FFFFFF" : ctx.accentTextLight} style={{ marginBottom: 16 }} /> : null}
       {bodyTitle}
       <Body body={slide.body} theme={theme} ctx={ctx} />

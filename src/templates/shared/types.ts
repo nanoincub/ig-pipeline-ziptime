@@ -14,6 +14,12 @@ export interface RenderContext {
    * restritos (cyan/red) cai para ink. Em tema escuro o template usa branco.
    */
   accentTextLight: string;
+  /** cor do número grande; ink quando o accent é superfície (ciano) ou no tema yellow. */
+  numberColor: string;
+  /** superfície (marca-texto) atrás do número grande; só para accents-superfície. */
+  numberSurface?: string;
+  /** cor de texto/número POR CIMA de um preenchimento de accent (badge, pílula). */
+  onAccentText: string;
   /** índice 0-based do slide */
   index: number;
   total: number;
@@ -107,7 +113,8 @@ export function resolveTheme(post: Post, tokens: BrandTokens): ThemeResolved {
         ...fonts,
         background: tokens.colors.yellow!,
         text: tokens.colors.ink,
-        textSoft: tokens.colors.neutral600,
+        // Amarelo é superfície: texto suave também em ink (neutral600 fica fraco).
+        textSoft: tokens.colors.ink,
         onDark: false,
       };
     case "light":

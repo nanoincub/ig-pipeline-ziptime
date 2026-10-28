@@ -47,8 +47,14 @@ export function resolveSize(size: Post["size"]): { width: number; height: number
   return { width: w, height: h };
 }
 
-/** Accents cuja cor tem contraste insuficiente para texto pequeno sobre branco. */
-const RESTRICTED_ACCENTS = new Set<Post["accent"]>(["cyan", "red"]);
+/**
+ * Accents-superfície: a cor nunca é usada em texto/número. Ela entra como
+ * superfície (fundo de badge, pílula, marca-texto atrás do número); o texto/
+ * número por cima sai em ink. Hoje: ciano.
+ */
+const SURFACE_ACCENTS = new Set<Post["accent"]>(["cyan"]);
+/** Accents cuja cor tem contraste baixo para TEXTO pequeno; nesses, texto → ink. */
+const SMALL_TEXT_INK_ACCENTS = new Set<Post["accent"]>(["cyan", "red"]);
 
 /** Cor de accent exigida por tema que não é garantida em toda marca (chave em colors). */
 const THEME_REQUIRED_COLOR: Partial<Record<Post["theme"], "yellow">> = { yellow: "yellow" };
@@ -87,33 +93,62 @@ function tint(hex: string, alpha: number): string {
   return `rgba(${r}, ${g}, ${b}, ${alpha})`;
 }
 
-/**
- * Resolve o accent do post nas três cores que o template consome. Pressupõe que
- * `assertThemeAccentTokens` já rodou (cores opcionais garantidas). `accentLight`
- * de accents sem token *Light dedicado é uma tinta translúcida da própria cor.
- * `accentTextLight` é ink para accents restritos (cyan/red), senão o próprio accent.
- */
-function accentTriple(
-  tokens: BrandTokens,
-  accent: Post["accent"]
-): { accent: string; accentLight: string; accentTextLight: string } {
-  const restricted = RESTRICTED_ACCENTS.has(accent);
-  const textLight = (hex: string) => (restricted ? tokens.colors.ink : hex);
+/** Cores de accent/superfície já resolvidas que o template consome por campo. */
+export interface AccentResolved {
+  /** cor cheia do accent — preenchimentos: barras, linhas, blocos, badge, pílula. */
+  accent: string;
+  /** versão clara do accent (caixa de realce). */
+  accentLight: string;
+  /** texto pequeno de accent (kicker/CTA/rótulo) em tema claro; ink quando restrito. */
+  accentTextLight: string;
+  /** cor do número grande; ink quando o accent é superfície (ou tema yellow). */
+  numberColor: string;
+  /** superfície (marca-texto) atrás do número; definida só para accents-superfície. */
+  numberSurface?: string;
+  /** cor de texto/número POR CIMA de um preenchimento de accent (badge, pílula). */
+  onAccentText: string;
+}
+
+/** accent + accentLight brutos por nome (cores opcionais garantidas pelo assert). */
+function accentBase(tokens: BrandTokens, accent: Post["accent"]): { accent: string; accentLight: string } {
   switch (accent) {
     case "zipagent":
-      return { accent: tokens.colors.zipagent, accentLight: tokens.colors.zipagentLight, accentTextLight: textLight(tokens.colors.zipagent) };
+      return { accent: tokens.colors.zipagent, accentLight: tokens.colors.zipagentLight };
     case "zipzap":
-      return { accent: tokens.colors.zipzap, accentLight: tokens.colors.zipzapLight, accentTextLight: textLight(tokens.colors.zipzap) };
+      return { accent: tokens.colors.zipzap, accentLight: tokens.colors.zipzapLight };
     case "cyan":
-      return { accent: tokens.colors.cyan!, accentLight: tint(tokens.colors.cyan!, 0.14), accentTextLight: textLight(tokens.colors.cyan!) };
+      return { accent: tokens.colors.cyan!, accentLight: tint(tokens.colors.cyan!, 0.14) };
     case "red":
-      return { accent: tokens.colors.red!, accentLight: tint(tokens.colors.red!, 0.12), accentTextLight: textLight(tokens.colors.red!) };
+      return { accent: tokens.colors.red!, accentLight: tint(tokens.colors.red!, 0.12) };
     case "purple":
-      return { accent: tokens.colors.purple!, accentLight: tint(tokens.colors.purple!, 0.12), accentTextLight: textLight(tokens.colors.purple!) };
+      return { accent: tokens.colors.purple!, accentLight: tint(tokens.colors.purple!, 0.12) };
     case "primary":
     default:
-      return { accent: tokens.colors.primary, accentLight: tokens.colors.light, accentTextLight: textLight(tokens.colors.primary) };
+      return { accent: tokens.colors.primary, accentLight: tokens.colors.light };
   }
+}
+
+/**
+ * Resolve o accent do post nas cores por campo que o template consome, ciente do
+ * tema. Ciano e amarelo são superfície, nunca texto: por isso texto/número sobre
+ * eles sai em ink e o número ganha uma marca-texto da cor. Toda a condicional de
+ * contraste vive aqui (mesma camada do accentTextLight); o template só lê campos.
+ * Pressupõe que `assertThemeAccentTokens` já rodou.
+ */
+function resolveAccent(tokens: BrandTokens, theme: Post["theme"], accent: Post["accent"]): AccentResolved {
+  const ink = tokens.colors.ink;
+  const onYellow = theme === "yellow";
+  const surface = SURFACE_ACCENTS.has(accent);
+  const base = accentBase(tokens, accent);
+  return {
+    accent: base.accent,
+    accentLight: base.accentLight,
+    // tema yellow é superfície: todo texto de accent cai para ink.
+    accentTextLight: onYellow || SMALL_TEXT_INK_ACCENTS.has(accent) ? ink : base.accent,
+    numberColor: onYellow || surface ? ink : base.accent,
+    numberSurface: surface ? base.accent : undefined,
+    onAccentText: surface ? ink : "#FFFFFF",
+  };
 }
 
 function bgImageDataUri(slide: Slide, postDir: string): string | undefined {
@@ -144,14 +179,17 @@ export async function renderSlide(
   const slide = post.slides[index];
   const { width, height } = resolveSize(post.size);
   assertThemeAccentTokens(post, tokens);
-  const { accent, accentLight, accentTextLight } = accentTriple(tokens, post.accent);
+  const a = resolveAccent(tokens, post.theme, post.accent);
 
   const ctx: RenderContext = {
     post,
     tokens,
-    accent,
-    accentLight,
-    accentTextLight,
+    accent: a.accent,
+    accentLight: a.accentLight,
+    accentTextLight: a.accentTextLight,
+    numberColor: a.numberColor,
+    numberSurface: a.numberSurface,
+    onAccentText: a.onAccentText,
     index,
     total: post.slides.length,
     isLast: index === post.slides.length - 1,
