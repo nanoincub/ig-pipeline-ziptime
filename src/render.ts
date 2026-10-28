@@ -47,15 +47,72 @@ export function resolveSize(size: Post["size"]): { width: number; height: number
   return { width: w, height: h };
 }
 
-function accentPair(tokens: BrandTokens, accent: Post["accent"]): { accent: string; accentLight: string } {
+/** Accents cuja cor tem contraste insuficiente para texto pequeno sobre branco. */
+const RESTRICTED_ACCENTS = new Set<Post["accent"]>(["cyan", "red"]);
+
+/** Cor de accent exigida por tema que não é garantida em toda marca (chave em colors). */
+const THEME_REQUIRED_COLOR: Partial<Record<Post["theme"], "yellow">> = { yellow: "yellow" };
+/** Cor de accent exigida que não é garantida em toda marca. */
+const ACCENT_REQUIRED_COLOR: Partial<Record<Post["accent"], "cyan" | "red" | "purple">> = {
+  cyan: "cyan",
+  red: "red",
+  purple: "purple",
+};
+
+/**
+ * Garante que a marca define as cores exigidas pelo tema/accent do post. Falha
+ * com mensagem clara em vez de cair em fallback silencioso (regra do pipeline).
+ */
+export function assertThemeAccentTokens(post: Post, tokens: BrandTokens): void {
+  const missing: string[] = [];
+  const themeColor = THEME_REQUIRED_COLOR[post.theme];
+  if (themeColor && !tokens.colors[themeColor]) {
+    missing.push(`theme "${post.theme}" exige colors.${themeColor} na marca "${tokens.slug}"`);
+  }
+  const accentColorKey = ACCENT_REQUIRED_COLOR[post.accent];
+  if (accentColorKey && !tokens.colors[accentColorKey]) {
+    missing.push(`accent "${post.accent}" exige colors.${accentColorKey} na marca "${tokens.slug}"`);
+  }
+  if (missing.length) {
+    throw new Error(`cores da marca ausentes:\n${missing.map((m) => `  • ${m}`).join("\n")}`);
+  }
+}
+
+/** hex "#RRGGBB" -> rgba(...) com alpha, para derivar um fundo-tinta do accent. */
+function tint(hex: string, alpha: number): string {
+  const h = hex.replace("#", "");
+  const r = parseInt(h.slice(0, 2), 16);
+  const g = parseInt(h.slice(2, 4), 16);
+  const b = parseInt(h.slice(4, 6), 16);
+  return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+}
+
+/**
+ * Resolve o accent do post nas três cores que o template consome. Pressupõe que
+ * `assertThemeAccentTokens` já rodou (cores opcionais garantidas). `accentLight`
+ * de accents sem token *Light dedicado é uma tinta translúcida da própria cor.
+ * `accentTextLight` é ink para accents restritos (cyan/red), senão o próprio accent.
+ */
+function accentTriple(
+  tokens: BrandTokens,
+  accent: Post["accent"]
+): { accent: string; accentLight: string; accentTextLight: string } {
+  const restricted = RESTRICTED_ACCENTS.has(accent);
+  const textLight = (hex: string) => (restricted ? tokens.colors.ink : hex);
   switch (accent) {
     case "zipagent":
-      return { accent: tokens.colors.zipagent, accentLight: tokens.colors.zipagentLight };
+      return { accent: tokens.colors.zipagent, accentLight: tokens.colors.zipagentLight, accentTextLight: textLight(tokens.colors.zipagent) };
     case "zipzap":
-      return { accent: tokens.colors.zipzap, accentLight: tokens.colors.zipzapLight };
+      return { accent: tokens.colors.zipzap, accentLight: tokens.colors.zipzapLight, accentTextLight: textLight(tokens.colors.zipzap) };
+    case "cyan":
+      return { accent: tokens.colors.cyan!, accentLight: tint(tokens.colors.cyan!, 0.14), accentTextLight: textLight(tokens.colors.cyan!) };
+    case "red":
+      return { accent: tokens.colors.red!, accentLight: tint(tokens.colors.red!, 0.12), accentTextLight: textLight(tokens.colors.red!) };
+    case "purple":
+      return { accent: tokens.colors.purple!, accentLight: tint(tokens.colors.purple!, 0.12), accentTextLight: textLight(tokens.colors.purple!) };
     case "primary":
     default:
-      return { accent: tokens.colors.primary, accentLight: tokens.colors.light };
+      return { accent: tokens.colors.primary, accentLight: tokens.colors.light, accentTextLight: textLight(tokens.colors.primary) };
   }
 }
 
@@ -86,13 +143,15 @@ export async function renderSlide(
 ): Promise<SlideRenderResult> {
   const slide = post.slides[index];
   const { width, height } = resolveSize(post.size);
-  const { accent, accentLight } = accentPair(tokens, post.accent);
+  assertThemeAccentTokens(post, tokens);
+  const { accent, accentLight, accentTextLight } = accentTriple(tokens, post.accent);
 
   const ctx: RenderContext = {
     post,
     tokens,
     accent,
     accentLight,
+    accentTextLight,
     index,
     total: post.slides.length,
     isLast: index === post.slides.length - 1,

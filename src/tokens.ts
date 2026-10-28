@@ -141,8 +141,3 @@ export function loadBrand(slug: string): BrandTokens {
 
   return tokens;
 }
-
-/** Resolve a cor de accent escolhida no post para um hex dos tokens. */
-export function accentColor(tokens: BrandTokens, accent: "primary" | "zipagent" | "zipzap"): string {
-  return tokens.colors[accent];
-}

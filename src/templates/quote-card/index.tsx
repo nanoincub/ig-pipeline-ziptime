@@ -26,7 +26,7 @@ export function QuoteCard({ slide, ctx }: SlideComponentProps): JSX.Element {
     return (
       <Page ctx={ctx} theme={theme} role={slide.role} contentStyle={{ justifyContent: "center", alignItems: "flex-start" }}>
         <div style={{ display: "flex", width: 120, height: 10, backgroundColor: fioColor(theme.onDark, ctx.accent), borderRadius: 6, marginBottom: 40 }} />
-        {slide.kicker ? <Kicker theme={theme} text={slide.kicker} color={theme.onDark ? "#FFFFFF" : ctx.accent} style={{ marginBottom: 28 }} /> : null}
+        {slide.kicker ? <Kicker theme={theme} text={slide.kicker} color={theme.onDark ? "#FFFFFF" : ctx.accentTextLight} style={{ marginBottom: 28 }} /> : null}
         <div style={{ ...quoteStyle, textAlign: "left" }}>{quote}</div>
         {slide.source ? <SourceLine font={ctx.tokens.fonts.body} text={slide.source} color={theme.textSoft} marginTop={40} /> : null}
       </Page>
@@ -49,7 +49,7 @@ export function QuoteCard({ slide, ctx }: SlideComponentProps): JSX.Element {
         >
           “
         </div>
-        {slide.kicker ? <Kicker theme={theme} text={slide.kicker} color={theme.onDark ? "#FFFFFF" : ctx.accent} style={{ marginBottom: 20 }} /> : null}
+        {slide.kicker ? <Kicker theme={theme} text={slide.kicker} color={theme.onDark ? "#FFFFFF" : ctx.accentTextLight} style={{ marginBottom: 20 }} /> : null}
         <div style={{ ...quoteStyle, textAlign: "left" }}>{quote}</div>
         {slide.source ? <SourceLine font={ctx.tokens.fonts.body} text={slide.source} color={theme.textSoft} marginTop={40} /> : null}
       </Page>
@@ -95,7 +95,7 @@ export function QuoteCard({ slide, ctx }: SlideComponentProps): JSX.Element {
   // centered-light (default)
   return (
     <Page ctx={ctx} theme={theme} role={slide.role} contentStyle={{ justifyContent: "center", alignItems: "center", textAlign: "center" }}>
-      {slide.kicker ? <Kicker theme={theme} text={slide.kicker} color={theme.onDark ? "#FFFFFF" : ctx.accent} style={{ marginBottom: 32, justifyContent: "center" }} /> : null}
+      {slide.kicker ? <Kicker theme={theme} text={slide.kicker} color={theme.onDark ? "#FFFFFF" : ctx.accentTextLight} style={{ marginBottom: 32, justifyContent: "center" }} /> : null}
       <div style={{ ...quoteStyle, textAlign: "center" }}>{quote}</div>
       {slide.source ? <SourceLine font={ctx.tokens.fonts.body} text={slide.source} color={theme.textSoft} marginTop={40} center /> : null}
     </Page>

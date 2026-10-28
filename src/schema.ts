@@ -7,8 +7,8 @@ import { z } from "zod";
 
 export const TEMPLATES = ["quote-card", "carousel-edu", "carousel-list"] as const;
 export const SIZES = ["1080x1350", "1080x1080", "1080x1920"] as const;
-export const THEMES = ["light", "light-blue", "gradient-hero", "gradient-zipagent"] as const;
-export const ACCENTS = ["primary", "zipagent", "zipzap"] as const;
+export const THEMES = ["light", "light-blue", "gradient-hero", "gradient-zipagent", "solid-blue", "yellow"] as const;
+export const ACCENTS = ["primary", "zipagent", "zipzap", "cyan", "red", "purple"] as const;
 export const ROLES = ["cover", "body", "close"] as const;
 
 /**

@@ -8,6 +8,12 @@ export interface RenderContext {
   accent: string;
   /** versão clara da cor de accent (para caixas/realces) */
   accentLight: string;
+  /**
+   * cor de accent segura para TEXTO pequeno (kicker, CTA, rótulos < 56px) em tema
+   * claro. Igual ao accent para cores de contraste suficiente; para accents
+   * restritos (cyan/red) cai para ink. Em tema escuro o template usa branco.
+   */
+  accentTextLight: string;
   /** índice 0-based do slide */
   index: number;
   total: number;
@@ -84,6 +90,25 @@ export function resolveTheme(post: Post, tokens: BrandTokens): ThemeResolved {
         text: "#FFFFFF",
         textSoft: "rgba(255,255,255,0.8)",
         onDark: true,
+      };
+    case "solid-blue":
+      // Fundo azul sólido (primary): texto branco, símbolo da versão p/ fundo escuro.
+      return {
+        ...fonts,
+        background: tokens.colors.primary,
+        text: "#FFFFFF",
+        textSoft: "rgba(255,255,255,0.8)",
+        onDark: true,
+      };
+    case "yellow":
+      // Fundo amarelo (só fundo): texto ink, símbolo azul da versão p/ fundo claro.
+      // O amarelo nunca é cor de texto nem de accent — só o fundo do slide.
+      return {
+        ...fonts,
+        background: tokens.colors.yellow!,
+        text: tokens.colors.ink,
+        textSoft: tokens.colors.neutral600,
+        onDark: false,
       };
     case "light":
     default:

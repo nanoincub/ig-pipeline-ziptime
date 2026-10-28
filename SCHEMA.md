@@ -11,8 +11,8 @@ Gerado de `src/schema.ts` por `ig-render schema`. Não editar à mão.
 | `brand` | string | obrigatório | slug da marca (brands/<brand>.json) |
 | `template` | quote-card \| carousel-edu \| carousel-list | obrigatório | qual template renderiza o post |
 | `size` | 1080x1350 \| 1080x1080 \| 1080x1920 | default 1080x1350 | dimensão do criativo |
-| `theme` | light \| light-blue \| gradient-hero \| gradient-zipagent | default light | fundo do post (cor ou gradiente) |
-| `accent` | primary \| zipagent \| zipzap | default primary | cor de destaque de kicker, números e blocos |
+| `theme` | light \| light-blue \| gradient-hero \| gradient-zipagent \| solid-blue \| yellow | default light | fundo do post (cor ou gradiente) |
+| `accent` | primary \| zipagent \| zipzap \| cyan \| red \| purple | default primary | cor de destaque de kicker, números e blocos |
 | `signature.enabled` | boolean | default true | mostra a assinatura da marca |
 | `signature.onlyLastSlide` | boolean | default true | assinatura só no último slide |
 | `slides` | Slide[] | obrigatório, min 1 | lista de slides na ordem de exibição |
@@ -54,7 +54,10 @@ A `variant` de cada slide precisa estar na lista do seu `template` + `role`.
 - `body` com mais de 60 palavras gera **aviso** (não bloqueia o render).
 - Título de capa encolhe por nº de caracteres: ≤40 → 96px, ≤70 → 84px, senão 72px.
 - `summary-list` (carousel-edu/close) usa `body` como itens separados por quebra de linha.
-- Temas `gradient-*` usam texto branco; `light`/`light-blue` usam texto escuro.
+- Temas `gradient-*` e `solid-blue` usam texto branco e a versão do símbolo para fundo escuro; `light`/`light-blue`/`yellow` usam texto escuro e o símbolo azul.
+- `yellow` (fundo `colors.yellow`) e `solid-blue` (fundo `colors.primary`) são **só temas de fundo**. O amarelo nunca vira cor de texto nem de accent.
+- Accents `cyan`, `red` e `purple` vêm de `colors.{cyan,red,purple}` da marca. `cyan` e `red` só são aplicados a elementos grandes (números, barras, ícones, tags e títulos ≥ 56px); em kicker, CTA e texto de corpo o template cai para `ink` (tema claro) ou branco (tema escuro).
+- Se a marca não define a cor exigida pelo `theme`/`accent` escolhido, o `validate` **falha** com mensagem clara (sem fallback silencioso).
 - Carrosséis mostram contador `n/total` em todos os slides menos a capa.
 
 ## Saída

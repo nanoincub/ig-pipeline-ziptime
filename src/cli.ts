@@ -6,7 +6,7 @@ import { config as dotenvConfig } from "dotenv";
 import { Command } from "commander";
 import { parsePost, type Post } from "./schema.js";
 import { loadBrand, type BrandTokens } from "./tokens.js";
-import { loadFonts, renderPost, listPosts, type SatoriFont, type Manifest } from "./render.js";
+import { loadFonts, renderPost, listPosts, assertThemeAccentTokens, type SatoriFont, type Manifest } from "./render.js";
 import { buildContactSheet, collectSlidePngs } from "./contact-sheet.js";
 import { loadUploadConfig, uploadSlug } from "./upload.js";
 import {
@@ -63,6 +63,8 @@ program
     const abs = resolve(process.cwd(), postPath);
     try {
       const { post, warnings } = parsePost(readJson(abs));
+      // Checa que a marca tem as cores exigidas pelo theme/accent (sem fallback).
+      assertThemeAccentTokens(post, loadBrand(post.brand));
       logErr(`✓ ${post.slug} válido — template ${post.template}, ${post.slides.length} slide(s).`);
       for (const w of warnings) logErr(`  ⚠ ${w}`);
       process.exit(0);
