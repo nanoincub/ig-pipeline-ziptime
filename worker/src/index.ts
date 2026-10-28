@@ -29,18 +29,22 @@ export interface Env {
 }
 
 const SEGMENT = /^[a-z0-9][a-z0-9-]*$/;
-const FILE = /^[a-z0-9][a-z0-9-]*\.(png|jpg|mp4)$/;
+const FILE = /^[a-z0-9][a-z0-9-]*\.(png|jpg|mp4|svg|json)$/;
 
 const ALLOWED_TYPES: Record<string, string> = {
   "image/png": ".png",
   "image/jpeg": ".jpg",
   "video/mp4": ".mp4",
+  "image/svg+xml": ".svg",
+  "application/json": ".json",
 };
 
 const EXT_TYPE: Record<string, string> = {
   png: "image/png",
   jpg: "image/jpeg",
   mp4: "video/mp4",
+  svg: "image/svg+xml",
+  json: "application/json",
 };
 
 const MAX_BYTES = 25 * 1024 * 1024; // 25 MB
@@ -60,12 +64,17 @@ function json(body: unknown, status = 200, extra: Record<string, string> = {}): 
 }
 
 function parseAssetPath(parts: string[]): { brand: string; slug: string; file: string } | null {
-  // espera exatamente [brand, slug, file]; rejeita segmentos extras, vazios ou ".."
-  if (parts.length !== 3) return null;
-  const [brand, slug, file] = parts;
+  // espera [brand, ...slug, file] com >= 3 segmentos: o slug pode ter mais de um
+  // nível para versionar (ex.: ziptime/brand/v1/logo.svg). Cada segmento é
+  // validado por SEGMENT (sem "/", sem ponto) e nenhum pode conter "..".
+  if (parts.length < 3) return null;
   if (parts.some((p) => p === "" || p.includes(".."))) return null;
-  if (!SEGMENT.test(brand) || !SEGMENT.test(slug) || !FILE.test(file)) return null;
-  return { brand, slug, file };
+  const brand = parts[0];
+  const file = parts[parts.length - 1];
+  const slugParts = parts.slice(1, -1);
+  if (!SEGMENT.test(brand) || !FILE.test(file)) return null;
+  if (!slugParts.every((p) => SEGMENT.test(p))) return null;
+  return { brand, slug: slugParts.join("/"), file };
 }
 
 function isBearerAuthorized(request: Request, env: Env): boolean {
@@ -358,10 +367,10 @@ function openApiSpec(origin: string): unknown {
                   properties: {
                     brand: { type: "string", description: "Marca em kebab-case, ex.: ziptime." },
                     slug: { type: "string", description: "Pasta do post em kebab-case." },
-                    file: { type: "string", description: "Nome do arquivo com extensão (.png, .jpg ou .mp4)." },
+                    file: { type: "string", description: "Nome do arquivo com extensão (.png, .jpg, .mp4, .svg ou .json)." },
                     content_type: {
                       type: "string",
-                      enum: ["image/png", "image/jpeg", "video/mp4"],
+                      enum: ["image/png", "image/jpeg", "video/mp4", "image/svg+xml", "application/json"],
                       description: "Tipo MIME do arquivo.",
                     },
                     data_base64: { type: "string", description: "Conteúdo do arquivo em base64." },
@@ -520,10 +529,21 @@ export default {
       const contentType = obj.httpMetadata?.contentType ?? EXT_TYPE[ext] ?? "application/octet-stream";
       const headers = new Headers({
         "content-type": contentType,
-        "cache-control": "public, max-age=31536000, immutable",
         "access-control-allow-origin": "*",
         etag: obj.httpEtag,
       });
+      // Manifest muda no lugar (chave fixa): cache curto. Demais assets usam chave
+      // versionada/com hash, então cache imutável de 1 ano.
+      if (asset.file.endsWith("manifest.json")) {
+        headers.set("cache-control", "public, max-age=300");
+      } else {
+        headers.set("cache-control", "public, max-age=31536000, immutable");
+      }
+      // SVG é servido como dado inerte: sem scripts, sem sniffing.
+      if (ext === "svg") {
+        headers.set("content-security-policy", "default-src 'none'; style-src 'unsafe-inline'");
+        headers.set("x-content-type-options", "nosniff");
+      }
       const bodyData = request.method === "HEAD" ? null : obj.body;
       return new Response(bodyData, { status: 200, headers });
     }

@@ -30,8 +30,13 @@ Sem Bearer → `401`. Bearer errado para a rota → `403`. Marca inexistente →
 Em falha de renovação, o token anterior é mantido e `last_error` (código + mensagem,
 sem token) é gravado. Fluxo de uso e CLI (`token:set` / `token:status`) no README raiz.
 
-`brand` e `slug` seguem `^[a-z0-9][a-z0-9-]*$`; `file` deve terminar em `.png`, `.jpg` ou `.mp4`.
-Tipos aceitos: `image/png`, `image/jpeg`, `video/mp4`. Limite de **25 MB** (binário no PUT, já decodificado no `/upload-json`).
+`brand` e cada segmento de `slug` seguem `^[a-z0-9][a-z0-9-]*$`; o `slug` pode ter mais de um
+nível para versionar (ex.: `ziptime/brand/v1/logo.svg`). `file` deve terminar em `.png`, `.jpg`,
+`.mp4`, `.svg` ou `.json`.
+Tipos aceitos: `image/png`, `image/jpeg`, `video/mp4`, `image/svg+xml`, `application/json`. Limite de **25 MB** (binário no PUT, já decodificado no `/upload-json`).
+
+Entrega: cache imutável de 1 ano, **exceto** arquivos terminados em `manifest.json` (`max-age=300`).
+SVG é servido com `Content-Security-Policy: default-src 'none'; style-src 'unsafe-inline'` e `X-Content-Type-Options: nosniff`.
 
 ## Deploy
 
