@@ -90,8 +90,9 @@ export function Signature(props: { ctx: RenderContext; theme: ThemeResolved }): 
   const { ctx, theme } = props;
   const sa = ctx.tokens.safeArea;
   const sig = ctx.tokens.signature;
-  // Em fundo escuro/gradiente usa o logo para fundo escuro; fallback para o claro.
-  const logo = theme.onDark ? sig.logoOnDarkData ?? sig.logoData : sig.logoData;
+  // Assinatura usa o símbolo (compacto): branco no fundo escuro/gradiente, azul no
+  // claro. logo/logoOnDark seguem resolvidos no contexto para uso futuro em layout.
+  const mark = theme.onDark ? sig.symbolOnDarkData ?? sig.symbolData : sig.symbolData;
   return (
     <div
       style={{
@@ -107,7 +108,7 @@ export function Signature(props: { ctx: RenderContext; theme: ThemeResolved }): 
         color: theme.onDark ? "rgba(255,255,255,0.8)" : ctx.tokens.colors.neutral600,
       }}
     >
-      {logo ? <LogoMark logo={logo} height={28} /> : null}
+      {mark ? <LogoMark logo={mark} height={28} /> : null}
       <div style={{ display: "flex" }}>{sig.text}</div>
     </div>
   );
