@@ -10,7 +10,7 @@ Pipeline multi-marca de criativos de Instagram: renderiza imagem única e carros
 
 | Pasta/arquivo | Papel |
 |---|---|
-| `brands/<slug>.json` | Tokens da marca (cores, fontes, safeArea). `brands/<slug>/logo.svg` é a logo. |
+| `brands/<slug>.json` | Tokens da marca (cores, fontes, safeArea). Logos oficiais em `brands/<slug>/` (completo claro/escuro + símbolo claro/escuro), referenciados em `signature`; `assets.manifest` aponta o manifest de logos no R2. |
 | `src/schema.ts` | Zod schema do Post + variantes válidas. Gera o `SCHEMA.md`. |
 | `src/render.ts` | Satori + resvg, loop de slides, grava `manifest.json`. |
 | `src/tokens.ts` | Carrega `brands/<slug>.json`. |
@@ -72,11 +72,18 @@ Repo público. **O token do Instagram mora só no KV do Worker.** O `.env` (giti
 
 ## Adicionar / cadastrar uma marca
 
-1. Crie `brands/<slug>.json` (mesma forma de `brands/ziptime.json`) e `brands/<slug>/logo.svg`. Nenhum código muda; use `--brand <slug>`.
+1. Crie `brands/<slug>.json` (mesma forma de `brands/ziptime.json`) e os SVGs de logo em `brands/<slug>/` referenciados em `signature` (`logo`, `logoOnDark`, `symbol`, `symbolOnDark` — todos opcionais; a assinatura usa `logo`/`logoOnDark` por tema). Nenhum código muda; use `--brand <slug>`.
 2. No `.env`: `IG_UPLOAD_ENDPOINT`, `IG_UPLOAD_TOKEN`, `IG_ADMIN_TOKEN` e, só para o cadastro, `IG_ACCESS_TOKEN` (token de longa duração) + `IG_USER_ID`.
 3. `node dist/cli.js token:set <slug>` → grava no KV e já renova.
 4. `node dist/cli.js token:status <slug>` → confira `username` e `expires_at`.
 5. **Remova `IG_ACCESS_TOKEN` do `.env`** — a partir daí o Cron renova sozinho.
+
+## Logos da marca no R2
+
+Os logos oficiais são versionados no repo (`brands/<slug>/`) **e** publicados no R2 sob chaves versionadas `(<brand>/brand/v1/<arquivo>)`, com um manifest em chave fixa `(<brand>/brand/manifest.json)` para skills/agentes descobrirem as URLs sem saber nomes de arquivo. O manifest classifica os logos em `full_light_bg`, `full_dark_bg`, `symbol_light_bg`, `symbol_dark_bg` (cada um com `svg`, `png`, `png_size`). A URL do manifest fica em `assets.manifest` no `brands/<slug>.json`.
+
+- **Logo novo/alterado:** suba na **próxima versão** (`v2/`, `v3/`…), nunca sobrescreva `v1/` — as chaves de asset têm cache imutável de 1 ano. Depois **atualize o manifest** (`version` + URLs) e bumpe `assets.manifest`/`signature` no `brands/<slug>.json` se trocar de arquivo. O manifest tem cache curto (`max-age=300`), então propaga rápido.
+- O Worker serve `.svg` com `Content-Security-Policy` restritiva + `X-Content-Type-Options: nosniff`.
 
 ## Pegadinhas
 
