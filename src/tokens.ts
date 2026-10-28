@@ -26,6 +26,16 @@ export interface BrandTokens {
     zipagentLight: string;
     zipzap: string;
     zipzapLight: string;
+    // Tokens adicionais espelhados do Guia de marca. Opcionais para não exigir
+    // paleta completa de marcas futuras.
+    logo?: string;
+    info?: string;
+    zipcal?: string;
+    zipcalLight?: string;
+    yellow?: string;
+    cyan?: string;
+    purple?: string;
+    red?: string;
   };
   gradients: {
     hero: string;
@@ -39,28 +49,65 @@ export interface BrandTokens {
   signature: {
     text: string;
     handle: string;
-    /** caminho do SVG do logo, relativo a brands/ (ex: "ziptime/logo.svg"). */
+    /** caminho do SVG do logo completo para fundo claro, relativo a brands/. */
     logo?: string;
-    /** logo já parseado (viewBox + paths), resolvido em loadBrand. */
+    /** logo completo para fundo escuro/gradiente. */
+    logoOnDark?: string;
+    /** símbolo (sem wordmark) para fundo claro. */
+    symbol?: string;
+    /** símbolo para fundo escuro/gradiente. */
+    symbolOnDark?: string;
+    /** logos já parseados (viewBox + paths com paint nativo), resolvidos em loadBrand. */
     logoData?: LogoData;
+    logoOnDarkData?: LogoData;
+    symbolData?: LogoData;
+    symbolOnDarkData?: LogoData;
+  };
+  assets?: {
+    /** URL fixa do manifest de logos publicado no R2. */
+    manifest?: string;
   };
   safeArea: number;
+}
+
+/** Paint nativo de um <path> do SVG (preservado tal como no arquivo oficial). */
+export interface LogoPath {
+  d: string;
+  /** cor de preenchimento; "none" quando o path é só contorno. */
+  fill: string;
+  /** cor de traço, quando o path é desenhado como contorno. */
+  stroke?: string;
+  /** espessura do traço (atributo stroke-width). */
+  strokeWidth?: number;
 }
 
 /** Logo vetorial pronto para inlinar em um <svg> do Satori. */
 export interface LogoData {
   viewBox: string;
-  /** atributos `d` de cada <path> do SVG, na ordem do arquivo. */
-  paths: string[];
+  /** cada <path> do SVG com seu paint nativo, na ordem do arquivo. */
+  paths: LogoPath[];
 }
 
 /**
- * Lê um SVG monocromático e extrai viewBox + os `d` dos <path>. A cor é
- * aplicada no render (não a do arquivo), para versão clara/branca por tema.
+ * Lê um SVG e extrai viewBox + cada <path> com seu paint nativo (fill/stroke/
+ * stroke-width). Preserva as cores oficiais do arquivo (logos bicolores: wordmark
+ * + símbolo) em vez de recolorir, e desenha contornos como contorno, não como
+ * área preenchida. `fill` default é "none" (o <svg> raiz usa fill="none", que é
+ * herdado), para que paths só-de-traço não virem blocos sólidos.
  */
 export function parseLogoSvg(svg: string): LogoData {
   const viewBox = svg.match(/viewBox="([^"]+)"/)?.[1] ?? "0 0 24 24";
-  const paths = [...svg.matchAll(/<path\b[^>]*\bd="([^"]+)"/g)].map((m) => m[1]);
+  const paths = [...svg.matchAll(/<path\b([^>]*)>/g)].map((m) => {
+    const attrs = m[1];
+    const d = attrs.match(/\bd="([^"]+)"/)?.[1] ?? "";
+    const fill = attrs.match(/\bfill="([^"]+)"/)?.[1] ?? "none";
+    const stroke = attrs.match(/\bstroke="([^"]+)"/)?.[1];
+    const strokeWidthRaw = attrs.match(/\bstroke-width="([^"]+)"/)?.[1];
+    const path: LogoPath = { d, fill };
+    if (stroke) path.stroke = stroke;
+    if (strokeWidthRaw) path.strokeWidth = Number(strokeWidthRaw);
+    return path;
+  });
   return { viewBox, paths };
 }
 
@@ -75,15 +122,22 @@ export function loadBrand(slug: string): BrandTokens {
   }
   const tokens = JSON.parse(raw) as BrandTokens;
 
-  // Resolve o logo referenciado em signature.logo (SVG inline, sem <img>).
-  if (tokens.signature.logo) {
-    const logoPath = join(BRANDS_DIR, tokens.signature.logo);
+  // Resolve cada variante de logo referenciada na assinatura (SVG inline, sem
+  // <img>). Cada uma é opcional; só resolve as que a marca declarar.
+  const resolveLogo = (ref: string | undefined): LogoData | undefined => {
+    if (!ref) return undefined;
+    const logoPath = join(BRANDS_DIR, ref);
     try {
-      tokens.signature.logoData = parseLogoSvg(readFileSync(logoPath, "utf8"));
+      return parseLogoSvg(readFileSync(logoPath, "utf8"));
     } catch {
       throw new Error(`logo da marca "${slug}" não encontrado (esperado em ${logoPath})`);
     }
-  }
+  };
+
+  tokens.signature.logoData = resolveLogo(tokens.signature.logo);
+  tokens.signature.logoOnDarkData = resolveLogo(tokens.signature.logoOnDark);
+  tokens.signature.symbolData = resolveLogo(tokens.signature.symbol);
+  tokens.signature.symbolOnDarkData = resolveLogo(tokens.signature.symbolOnDark);
 
   return tokens;
 }

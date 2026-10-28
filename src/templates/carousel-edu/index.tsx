@@ -52,7 +52,7 @@ function renderCover(slide: SlideComponentProps["slide"], ctx: RenderContext, th
             paddingRight: 56,
           }}
         >
-          {slide.kicker ? <Kicker text={slide.kicker} color={onBlockKicker} style={{ marginBottom: 28, justifyContent: "center" }} /> : null}
+          {slide.kicker ? <Kicker theme={theme} text={slide.kicker} color={onBlockKicker} style={{ marginBottom: 28, justifyContent: "center" }} /> : null}
           <div style={{ ...titleStyle, color: onBlockText, textAlign: "center" }}>{title}</div>
         </div>
       </Page>
@@ -75,7 +75,7 @@ function renderCover(slide: SlideComponentProps["slide"], ctx: RenderContext, th
         >
           {slide.number != null ? String(slide.number) : "01"}
         </div>
-        {slide.kicker ? <Kicker text={slide.kicker} color={theme.onDark ? "#FFFFFF" : ctx.accent} style={{ marginBottom: 20 }} /> : null}
+        {slide.kicker ? <Kicker theme={theme} text={slide.kicker} color={theme.onDark ? "#FFFFFF" : ctx.accent} style={{ marginBottom: 20 }} /> : null}
         <div style={{ ...titleStyle, textAlign: "left" }}>{title}</div>
       </Page>
     );
@@ -84,7 +84,7 @@ function renderCover(slide: SlideComponentProps["slide"], ctx: RenderContext, th
   // title-big-left (default)
   return (
     <Page ctx={ctx} theme={theme} role={slide.role} contentStyle={{ justifyContent: "flex-start", alignItems: "flex-start" }}>
-      {slide.kicker ? <Kicker text={slide.kicker} color={theme.onDark ? "#FFFFFF" : ctx.accent} style={{ marginBottom: 28, marginTop: 24 }} /> : null}
+      {slide.kicker ? <Kicker theme={theme} text={slide.kicker} color={theme.onDark ? "#FFFFFF" : ctx.accent} style={{ marginBottom: 28, marginTop: 24 }} /> : null}
       <div style={{ ...titleStyle, textAlign: "left" }}>{title}</div>
       <div style={{ display: "flex", width: 160, height: 10, backgroundColor: fioColor(theme.onDark, ctx.accent), borderRadius: 6, marginTop: 44 }} />
     </Page>
@@ -116,7 +116,7 @@ function Paragraphs(props: { body?: string; theme: ThemeResolved; ctx: RenderCon
           key={i}
           style={{
             display: "flex",
-            fontFamily: "Inter",
+            fontFamily: props.theme.fontBody,
             fontWeight: 400,
             fontSize: 36,
             lineHeight: 1.35,
@@ -140,7 +140,7 @@ function renderBody(slide: SlideComponentProps["slide"], ctx: RenderContext, the
     const big = slide.highlight ?? (slide.number != null ? String(slide.number) : "");
     return (
       <Page ctx={ctx} theme={theme} role={slide.role} contentStyle={common}>
-        {slide.kicker ? <Kicker text={slide.kicker} color={theme.onDark ? "#FFFFFF" : ctx.accent} style={{ marginBottom: 20 }} /> : null}
+        {slide.kicker ? <Kicker theme={theme} text={slide.kicker} color={theme.onDark ? "#FFFFFF" : ctx.accent} style={{ marginBottom: 20 }} /> : null}
         <div style={{ display: "flex", fontFamily: ctx.tokens.fonts.display, fontWeight: 700, fontSize: 180, lineHeight: 1, color: ctx.accent, marginBottom: 24 }}>
           {big}
         </div>
@@ -168,7 +168,7 @@ function renderBody(slide: SlideComponentProps["slide"], ctx: RenderContext, the
         >
           {q}
         </div>
-        {slide.source ? <div style={{ display: "flex", fontFamily: "Inter", fontWeight: 400, fontSize: 28, color: theme.textSoft, marginTop: 36 }}>{slide.source}</div> : null}
+        {slide.source ? <div style={{ display: "flex", fontFamily: theme.fontBody, fontWeight: 400, fontSize: 28, color: theme.textSoft, marginTop: 36 }}>{slide.source}</div> : null}
       </Page>
     );
   }
@@ -179,7 +179,7 @@ function renderBody(slide: SlideComponentProps["slide"], ctx: RenderContext, the
         <div style={{ display: "flex", flexDirection: "row", alignItems: "stretch", width: ctx.width - ctx.tokens.safeArea * 2 }}>
           <div style={{ display: "flex", flexShrink: 0, width: 10, backgroundColor: ctx.accent, borderRadius: 6, marginRight: 36 }} />
           <div style={{ display: "flex", flexDirection: "column", flex: 1 }}>
-            {slide.kicker ? <Kicker text={slide.kicker} color={theme.onDark ? "#FFFFFF" : ctx.accent} style={{ marginBottom: 20 }} /> : null}
+            {slide.kicker ? <Kicker theme={theme} text={slide.kicker} color={theme.onDark ? "#FFFFFF" : ctx.accent} style={{ marginBottom: 20 }} /> : null}
             {slide.title ? <div style={bodyTitleStyle(ctx, theme)}>{slide.title}</div> : null}
             <Paragraphs body={slide.body} theme={theme} ctx={ctx} />
           </div>
@@ -191,7 +191,7 @@ function renderBody(slide: SlideComponentProps["slide"], ctx: RenderContext, the
   if (slide.variant === "text-with-highlight") {
     return (
       <Page ctx={ctx} theme={theme} role={slide.role} contentStyle={common}>
-        {slide.kicker ? <Kicker text={slide.kicker} color={theme.onDark ? "#FFFFFF" : ctx.accent} style={{ marginBottom: 20 }} /> : null}
+        {slide.kicker ? <Kicker theme={theme} text={slide.kicker} color={theme.onDark ? "#FFFFFF" : ctx.accent} style={{ marginBottom: 20 }} /> : null}
         {slide.title ? <div style={bodyTitleStyle(ctx, theme)}>{slide.title}</div> : null}
         {slide.highlight ? (
           <div
@@ -222,7 +222,7 @@ function renderBody(slide: SlideComponentProps["slide"], ctx: RenderContext, the
   // text-only (default)
   return (
     <Page ctx={ctx} theme={theme} role={slide.role} contentStyle={common}>
-      {slide.kicker ? <Kicker text={slide.kicker} color={theme.onDark ? "#FFFFFF" : ctx.accent} style={{ marginBottom: 20 }} /> : null}
+      {slide.kicker ? <Kicker theme={theme} text={slide.kicker} color={theme.onDark ? "#FFFFFF" : ctx.accent} style={{ marginBottom: 20 }} /> : null}
       {slide.title ? <div style={bodyTitleStyle(ctx, theme)}>{slide.title}</div> : null}
       <Paragraphs body={slide.body} theme={theme} ctx={ctx} />
     </Page>
@@ -237,13 +237,13 @@ function renderClose(slide: SlideComponentProps["slide"], ctx: RenderContext, th
     const rowWidth = ctx.width - ctx.tokens.safeArea * 2;
     return (
       <Page ctx={ctx} theme={theme} role={slide.role} contentStyle={{ justifyContent: "center", alignItems: "flex-start" }}>
-        {slide.kicker ? <Kicker text={slide.kicker} color={theme.onDark ? "#FFFFFF" : ctx.accent} style={{ marginBottom: 20 }} /> : null}
+        {slide.kicker ? <Kicker theme={theme} text={slide.kicker} color={theme.onDark ? "#FFFFFF" : ctx.accent} style={{ marginBottom: 20 }} /> : null}
         {slide.title ? <div style={bodyTitleStyle(ctx, theme)}>{slide.title}</div> : null}
         <div style={{ display: "flex", flexDirection: "column", width: rowWidth }}>
           {items.map((it, i) => (
             <div key={i} style={{ display: "flex", flexDirection: "row", alignItems: "flex-start", width: rowWidth, marginBottom: 22 }}>
               <div style={{ display: "flex", flexShrink: 0, width: 14, height: 14, borderRadius: 7, backgroundColor: ctx.accent, marginTop: 16, marginRight: 24 }} />
-              <div style={{ display: "flex", flex: 1, fontFamily: "Inter", fontWeight: 400, fontSize: 36, lineHeight: 1.3, color: theme.text }}>{it}</div>
+              <div style={{ display: "flex", flex: 1, fontFamily: theme.fontBody, fontWeight: 400, fontSize: 36, lineHeight: 1.3, color: theme.text }}>{it}</div>
             </div>
           ))}
         </div>
@@ -255,7 +255,7 @@ function renderClose(slide: SlideComponentProps["slide"], ctx: RenderContext, th
   if (slide.variant === "cta-save") {
     return (
       <Page ctx={ctx} theme={theme} role={slide.role} contentStyle={{ justifyContent: "center", alignItems: "flex-start" }}>
-        {slide.kicker ? <Kicker text={slide.kicker} color={theme.onDark ? "#FFFFFF" : ctx.accent} style={{ marginBottom: 24 }} /> : null}
+        {slide.kicker ? <Kicker theme={theme} text={slide.kicker} color={theme.onDark ? "#FFFFFF" : ctx.accent} style={{ marginBottom: 24 }} /> : null}
         {slide.title ? (
           <div style={{ display: "flex", fontFamily: ctx.tokens.fonts.display, fontWeight: 700, fontSize: 68, lineHeight: 1.08, letterSpacing: em(-0.02, 68), color: theme.text, marginBottom: 40 }}>
             {slide.title}
@@ -269,7 +269,7 @@ function renderClose(slide: SlideComponentProps["slide"], ctx: RenderContext, th
   // cta-simple (default)
   return (
     <Page ctx={ctx} theme={theme} role={slide.role} contentStyle={{ justifyContent: "center", alignItems: "flex-start" }}>
-      {slide.kicker ? <Kicker text={slide.kicker} color={theme.onDark ? "#FFFFFF" : ctx.accent} style={{ marginBottom: 24 }} /> : null}
+      {slide.kicker ? <Kicker theme={theme} text={slide.kicker} color={theme.onDark ? "#FFFFFF" : ctx.accent} style={{ marginBottom: 24 }} /> : null}
       {slide.title ? (
         <div style={{ display: "flex", fontFamily: ctx.tokens.fonts.display, fontWeight: 700, fontSize: 72, lineHeight: 1.06, letterSpacing: em(-0.02, 72), color: theme.text, marginBottom: 36 }}>
           {slide.title}

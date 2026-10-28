@@ -9,30 +9,41 @@
     "deep": "#062E60",
     "ink": "#0A1628",
     "bg": "#FFFFFF",
+    "logo": "#1D78F6",
     "neutral600": "#6B7280",
     "neutral400": "#D1D5DB",
     "neutral100": "#F3F4F6",
     "success": "#10B981",
     "warning": "#F59E0B",
     "danger": "#EF4444",
+    "info": "#0EA5E9",
     "zipagent": "#6B47DC",
     "zipagentLight": "#F3EEFF",
     "zipzap": "#25D366",
-    "zipzapLight": "#E6F7EE"
+    "zipzapLight": "#E6F7EE",
+    "zipcal": "#4285F4",
+    "zipcalLight": "#E8F0FE",
+    "yellow": "#EEBE43",
+    "cyan": "#43BBEE",
+    "purple": "#8738D7",
+    "red": "#C94248"
   },
   "gradients": {
     "hero": "linear-gradient(135deg, #1B79EE 0%, #0C4C9D 100%)",
     "zipagent": "linear-gradient(135deg, #1B79EE 0%, #6B47DC 100%)"
   },
-  "fonts": {
-    "display": "Sora",
-    "body": "Inter"
-  },
+  "fonts": { "display": "Sora", "body": "Inter" },
   "radius": 24,
   "signature": {
     "text": "ziptime.com.br",
-    "handle": "@ziptime",
-    "logo": "ziptime/logo.svg"
+    "handle": "@ziptimeapp",
+    "logo": "ziptime/logotipo-ziptime.svg",
+    "logoOnDark": "ziptime/logotipo-ziptime-dark.svg",
+    "symbol": "ziptime/logotipo-ziptime-simbolo-azul.svg",
+    "symbolOnDark": "ziptime/logotipo-ziptime-simbolo-dark.svg"
+  },
+  "assets": {
+    "manifest": "https://ig-assets.desenvolvimento-2bb.workers.dev/ziptime/brand/manifest.json"
   },
   "safeArea": 80
 }

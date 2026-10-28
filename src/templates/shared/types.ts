@@ -37,6 +37,8 @@ export interface ThemeResolved {
   textSoft: string;
   /** true em fundos gradiente (texto claro) */
   onDark: boolean;
+  /** fonte de corpo da marca (tokens.fonts.body), para não hardcodar nos templates */
+  fontBody: string;
 }
 
 /** em -> px, relativo a um tamanho de fonte (Satori é mais previsível com px). */
@@ -55,9 +57,11 @@ export function fioColor(onDark: boolean, accent: string): string {
 
 /** Resolve o tema do post em cores concretas de fundo e texto. */
 export function resolveTheme(post: Post, tokens: BrandTokens): ThemeResolved {
+  const fonts = { fontBody: tokens.fonts.body };
   switch (post.theme) {
     case "light-blue":
       return {
+        ...fonts,
         background: tokens.colors.light,
         text: tokens.colors.ink,
         textSoft: tokens.colors.neutral600,
@@ -65,6 +69,7 @@ export function resolveTheme(post: Post, tokens: BrandTokens): ThemeResolved {
       };
     case "gradient-hero":
       return {
+        ...fonts,
         background: tokens.colors.secondary,
         backgroundImage: tokens.gradients.hero,
         text: "#FFFFFF",
@@ -73,6 +78,7 @@ export function resolveTheme(post: Post, tokens: BrandTokens): ThemeResolved {
       };
     case "gradient-zipagent":
       return {
+        ...fonts,
         background: tokens.colors.zipagent,
         backgroundImage: tokens.gradients.zipagent,
         text: "#FFFFFF",
@@ -82,6 +88,7 @@ export function resolveTheme(post: Post, tokens: BrandTokens): ThemeResolved {
     case "light":
     default:
       return {
+        ...fonts,
         background: tokens.colors.bg,
         text: tokens.colors.ink,
         textSoft: tokens.colors.neutral600,

@@ -1,5 +1,6 @@
 import type { ReactNode, CSSProperties } from "react";
 import type { RenderContext, ThemeResolved } from "./types.js";
+import type { LogoData } from "../../tokens.js";
 import { em } from "./types.js";
 
 /**
@@ -88,9 +89,9 @@ function bgOverlay(ctx: RenderContext): number {
 export function Signature(props: { ctx: RenderContext; theme: ThemeResolved }): JSX.Element {
   const { ctx, theme } = props;
   const sa = ctx.tokens.safeArea;
-  const logo = ctx.tokens.signature.logoData;
-  // Logo recolorido por tema: branco em gradiente, primary em tema claro.
-  const logoColor = theme.onDark ? "#FFFFFF" : ctx.tokens.colors.primary;
+  const sig = ctx.tokens.signature;
+  // Em fundo escuro/gradiente usa o logo para fundo escuro; fallback para o claro.
+  const logo = theme.onDark ? sig.logoOnDarkData ?? sig.logoData : sig.logoData;
   return (
     <div
       style={{
@@ -106,14 +107,14 @@ export function Signature(props: { ctx: RenderContext; theme: ThemeResolved }): 
         color: theme.onDark ? "rgba(255,255,255,0.8)" : ctx.tokens.colors.neutral600,
       }}
     >
-      {logo ? <LogoMark logo={logo} color={logoColor} height={28} /> : null}
-      <div style={{ display: "flex" }}>{ctx.tokens.signature.text}</div>
+      {logo ? <LogoMark logo={logo} height={28} /> : null}
+      <div style={{ display: "flex" }}>{sig.text}</div>
     </div>
   );
 }
 
-/** Logo da marca como SVG inline (paths recoloridos no render). */
-function LogoMark(props: { logo: { viewBox: string; paths: string[] }; color: string; height: number }): JSX.Element {
+/** Logo da marca como SVG inline, preservando o paint nativo (fill/stroke) do arquivo. */
+function LogoMark(props: { logo: LogoData; height: number }): JSX.Element {
   const [, , vbW, vbH] = props.logo.viewBox.split(/\s+/).map(Number);
   const ratio = vbW && vbH ? vbW / vbH : 1;
   const width = Math.round(props.height * ratio);
@@ -126,8 +127,8 @@ function LogoMark(props: { logo: { viewBox: string; paths: string[] }; color: st
       xmlns="http://www.w3.org/2000/svg"
       style={{ marginRight: 12 }}
     >
-      {props.logo.paths.map((d, i) => (
-        <path key={i} d={d} fill={props.color} />
+      {props.logo.paths.map((p, i) => (
+        <path key={i} d={p.d} fill={p.fill} stroke={p.stroke} strokeWidth={p.strokeWidth} />
       ))}
     </svg>
   );
@@ -172,12 +173,12 @@ function DebugSafeArea(props: { sa: number; ctx: RenderContext }): JSX.Element {
 }
 
 /** Rótulo pequeno acima do título. */
-export function Kicker(props: { text: string; color: string; style?: CSSProperties }): JSX.Element {
+export function Kicker(props: { theme: ThemeResolved; text: string; color: string; style?: CSSProperties }): JSX.Element {
   return (
     <div
       style={{
         display: "flex",
-        fontFamily: "Inter",
+        fontFamily: props.theme.fontBody,
         fontWeight: 600,
         fontSize: 24,
         letterSpacing: em(0.08, 24),
