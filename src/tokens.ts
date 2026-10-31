@@ -67,6 +67,12 @@ export interface BrandTokens {
     /** URL fixa do manifest de logos publicado no R2. */
     manifest?: string;
   };
+  /** Preferências visuais por template; o Post pode sobrescrevê-las. */
+  templateDefaults?: {
+    carouselEdu?: {
+      symbolWatermark?: boolean;
+    };
+  };
   safeArea: number;
 }
 

@@ -67,6 +67,8 @@ export const postSchema = z
     size: z.enum(SIZES).default("1080x1350"),
     theme: z.enum(THEMES).default("light"),
     accent: z.enum(ACCENTS).default("primary"),
+    /** Sobrescreve o motivo visual padrão da marca no carousel-edu. */
+    watermark: z.enum(["symbol", "none"]).optional(),
     signature: z
       .object({
         enabled: z.boolean().default(true),

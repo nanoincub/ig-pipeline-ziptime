@@ -13,6 +13,7 @@ Gerado de `src/schema.ts` por `ig-render schema`. Não editar à mão.
 | `size` | 1080x1350 \| 1080x1080 \| 1080x1920 | default 1080x1350 | dimensão do criativo |
 | `theme` | light \| light-blue \| gradient-hero \| gradient-zipagent \| solid-blue \| yellow | default light | fundo do post (cor ou gradiente) |
 | `accent` | primary \| zipagent \| zipzap \| cyan \| red \| purple | default primary | cor de destaque de kicker, números e blocos |
+| `watermark` | symbol \| none | opcional | sobrescreve o padrão da marca no carousel-edu; símbolo gigante atrás do texto em fundos claros |
 | `signature.enabled` | boolean | default true | mostra a assinatura da marca |
 | `signature.onlyLastSlide` | boolean | default true | assinatura só no último slide |
 | `slides` | Slide[] | obrigatório, min 1 | lista de slides na ordem de exibição |

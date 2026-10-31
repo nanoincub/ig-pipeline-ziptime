@@ -184,6 +184,7 @@ node dist/cli.js token:status ziptime
   "size": "1080x1350",                // default; também 1080x1080, 1080x1920
   "theme": "light",                   // light | light-blue | gradient-hero | gradient-zipagent
   "accent": "primary",                // primary | zipagent | zipzap
+  "watermark": "symbol",              // symbol | none; sobrescreve o padrão da marca no carousel-edu
   "signature": { "enabled": true, "onlyLastSlide": true },
   "slides": [
     {
@@ -222,6 +223,10 @@ node dist/cli.js token:status ziptime
 - Kicker: Inter 600 24px uppercase, tracking 0.08em, na cor de accent.
 - Assinatura no canto inferior direito; contador `n/total` no inferior esquerdo
   dos carrosséis (exceto na capa).
+- No `carousel-edu`, marcas com `templateDefaults.carouselEdu.symbolWatermark=true`
+  exibem o símbolo oficial ampliado e recortado nos temas claros. O Post pode
+  definir `watermark: "none"` para desligar ou `watermark: "symbol"` para ligar.
+  A marca d'água fica atrás do texto e não aparece sobre imagem de fundo.
 - `body` acima de 60 palavras gera **aviso** (não erro).
 
 ## Estrutura
