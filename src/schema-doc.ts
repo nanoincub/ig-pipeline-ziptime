@@ -27,6 +27,7 @@ const POST_FIELDS: Field[] = [
   { name: "size", type: SIZES.join(" | "), req: "default 1080x1350", desc: "dimensão do criativo" },
   { name: "theme", type: THEMES.join(" | "), req: "default light", desc: "fundo do post (cor ou gradiente)" },
   { name: "accent", type: ACCENTS.join(" | "), req: "default primary", desc: "cor de destaque de kicker, números e blocos" },
+  { name: "watermark", type: "symbol | none", req: "opcional", desc: "sobrescreve o padrão da marca no carousel-edu; símbolo gigante atrás do texto em fundos claros" },
   { name: "signature.enabled", type: "boolean", req: "default true", desc: "mostra a assinatura da marca" },
   { name: "signature.onlyLastSlide", type: "boolean", req: "default true", desc: "assinatura só no último slide" },
   { name: "slides", type: "Slide[]", req: "obrigatório, min 1", desc: "lista de slides na ordem de exibição" },

@@ -45,5 +45,8 @@
   "assets": {
     "manifest": "https://ig-assets.desenvolvimento-2bb.workers.dev/ziptime/brand/manifest.json"
   },
+  "templateDefaults": {
+    "carouselEdu": { "symbolWatermark": true }
+  },
   "safeArea": 80
 }

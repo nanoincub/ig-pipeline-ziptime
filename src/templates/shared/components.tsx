@@ -12,9 +12,10 @@ export function Page(props: {
   theme: ThemeResolved;
   role: string;
   contentStyle?: CSSProperties;
+  symbolWatermark?: boolean;
   children: ReactNode;
 }): JSX.Element {
-  const { ctx, theme, role, contentStyle, children } = props;
+  const { ctx, theme, role, contentStyle, symbolWatermark, children } = props;
   const { tokens, post } = ctx;
   const sa = tokens.safeArea;
 
@@ -31,6 +32,7 @@ export function Page(props: {
         position: "relative",
         width: ctx.width,
         height: ctx.height,
+        overflow: "hidden",
         backgroundColor: theme.background,
         ...(theme.backgroundImage ? { backgroundImage: theme.backgroundImage } : {}),
         color: theme.text,
@@ -59,6 +61,10 @@ export function Page(props: {
         />
       ) : null}
 
+      {symbolWatermark && !theme.onDark && !ctx.bgImageDataUri && tokens.signature.symbolData ? (
+        <SymbolWatermark ctx={ctx} logo={tokens.signature.symbolData} />
+      ) : null}
+
       <div
         style={{
           display: "flex",
@@ -78,6 +84,33 @@ export function Page(props: {
       {showCounter ? <SlideCounter ctx={ctx} theme={theme} /> : null}
       {ctx.debug ? <DebugSafeArea sa={sa} ctx={ctx} /> : null}
     </div>
+  );
+}
+
+/** Símbolo oficial ampliado, parcialmente fora da tela, abaixo de todo o texto. */
+function SymbolWatermark(props: { ctx: RenderContext; logo: LogoData }): JSX.Element {
+  const { ctx, logo } = props;
+  const [, , vbW, vbH] = logo.viewBox.split(/\s+/).map(Number);
+  const width = Math.round(ctx.width * 0.72);
+  const height = Math.round(width * (vbH / vbW));
+  return (
+    <svg
+      width={width}
+      height={height}
+      viewBox={logo.viewBox}
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+      style={{
+        position: "absolute",
+        left: ctx.width - Math.round(width * 0.67),
+        top: Math.round(ctx.height * 0.39),
+        opacity: 0.105,
+      }}
+    >
+      {logo.paths.map((p, i) => (
+        <path key={i} d={p.d} fill={p.fill} stroke={p.stroke} strokeWidth={p.strokeWidth} />
+      ))}
+    </svg>
   );
 }
 

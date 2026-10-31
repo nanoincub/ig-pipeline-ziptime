@@ -1,7 +1,14 @@
 import type { CSSProperties } from "react";
 import type { SlideComponentProps, RenderContext, ThemeResolved } from "../shared/types.js";
 import { resolveTheme, coverTitleSize, em, paragraphs, lines, fioColor } from "../shared/types.js";
-import { Page, Kicker, CtaButton, BigNumber } from "../shared/components.js";
+import { Page as BasePage, Kicker, CtaButton, BigNumber } from "../shared/components.js";
+
+function Page(props: Parameters<typeof BasePage>[0]): JSX.Element {
+  const { post, tokens } = props.ctx;
+  const symbolWatermark = post.watermark === "symbol" ||
+    (post.watermark === undefined && tokens.templateDefaults?.carouselEdu?.symbolWatermark === true);
+  return <BasePage {...props} symbolWatermark={symbolWatermark} />;
+}
 
 /**
  * carousel-edu — carrossel explicativo.
