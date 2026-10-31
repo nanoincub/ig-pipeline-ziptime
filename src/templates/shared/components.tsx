@@ -87,7 +87,12 @@ export function Page(props: {
   );
 }
 
-/** Símbolo oficial ampliado, parcialmente fora da tela, abaixo de todo o texto. */
+/**
+ * Símbolo oficial ampliado, parcialmente fora da tela, abaixo de todo o texto.
+ * Escala, opacidade e sangria pela direita são constantes (unidade visual); só a
+ * âncora vertical varia por papel/índice do slide (ritmo editorial: capa ancora
+ * embaixo, fechamento no topo, corpo cicla topo/meio/baixo) — ver watermarkTop.
+ */
 function SymbolWatermark(props: { ctx: RenderContext; logo: LogoData }): JSX.Element {
   const { ctx, logo } = props;
   const [, , vbW, vbH] = logo.viewBox.split(/\s+/).map(Number);
@@ -103,7 +108,7 @@ function SymbolWatermark(props: { ctx: RenderContext; logo: LogoData }): JSX.Ele
       style={{
         position: "absolute",
         left: ctx.width - Math.round(width * 0.67),
-        top: Math.round(ctx.height * 0.39),
+        top: watermarkTop(ctx, height),
         opacity: 0.105,
       }}
     >
@@ -112,6 +117,22 @@ function SymbolWatermark(props: { ctx: RenderContext; logo: LogoData }): JSX.Ele
       ))}
     </svg>
   );
+}
+
+/** Âncora vertical da marca d'água por papel/índice do slide (sangria constante à direita). */
+function watermarkTop(ctx: RenderContext, height: number): number {
+  const role = ctx.post.slides[ctx.index]?.role;
+  const bleedBottom = (frac: number) => ctx.height - height + Math.round(height * frac);
+  if (role === "cover") return bleedBottom(0.18);
+  if (role === "close") return -Math.round(height * 0.14);
+  switch (ctx.index % 3) {
+    case 0:
+      return -Math.round(height * 0.12);
+    case 1:
+      return bleedBottom(0.16);
+    default:
+      return Math.round((ctx.height - height) / 2);
+  }
 }
 
 function bgOverlay(ctx: RenderContext): number {

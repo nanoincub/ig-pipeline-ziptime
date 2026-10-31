@@ -226,7 +226,10 @@ node dist/cli.js token:status ziptime
 - No `carousel-edu`, marcas com `templateDefaults.carouselEdu.symbolWatermark=true`
   exibem o símbolo oficial ampliado e recortado nos temas claros. O Post pode
   definir `watermark: "none"` para desligar ou `watermark: "symbol"` para ligar.
-  A marca d'água fica atrás do texto e não aparece sobre imagem de fundo.
+  A marca d'água fica atrás do texto e não aparece sobre imagem de fundo. A âncora
+  vertical varia por slide (capa ancora embaixo, fechamento no topo, corpo alterna
+  topo/meio/baixo) para dar ritmo sem perder a unidade — escala, lado e opacidade
+  constantes.
 - `body` acima de 60 palavras gera **aviso** (não erro).
 
 ## Estrutura
